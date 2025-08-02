@@ -5,19 +5,26 @@ import { Loader } from 'lucide-react';
 import { Suspense } from 'react';
 import { cn } from './lib/utils';
 import Home from './pages/Home';
+import LetterDemo from './pages/LetterDemo';
+import LetterTiptapDemo from './pages/LetterTiptapDemo';
 import { AnimatePresence } from 'framer-motion';
 import { BASE_PATH } from './lib/config';
 function App() {
   return (
-    <><Suspense fallback={<LoadingSpinner />}>
+    <>
+    <Suspense fallback={<LoadingSpinner />}>
       <Router basename={BASE_PATH}>
           <AnimatePresence mode="wait">
             <Routes >
+              <Route path='/' element={<Home />} />
+              <Route path='/letter' element={<LetterDemo />} />
+              <Route path='/letter-tiptap' element={<LetterTiptapDemo />} />
               <Route path='*' element={<Home />} />
             </Routes>
           </AnimatePresence>
         </Router>
-    </Suspense></>
+    </Suspense>
+    </>
   );
 }
 

@@ -1,10 +1,4 @@
-.rm-pagination-gap {
-  @apply border-t border-b border-[#e5e5e5];
-}
 
-.rm-with-pagination .rm-page-footer::after {
-  @apply text-gray-500;
-}
 
 .rm-with-pagination .rm-page-footer,
 .rm-with-pagination .rm-page-header {
@@ -17,4 +11,66 @@
 
 .rm-with-pagination table tr:is(:last-child) {
   @apply mb-4;
+}
+
+.editor-container .rm-page-footer{
+  /* height: 40px !important; */
+  background: transparent !important;
+}
+
+.editor-container .rm-page-header {
+  background: transparent !important;
+}
+
+/* Letter editor with repeating background */
+.letter-editor .ProseMirror {
+  font-family: 'Ainmom', Arial, sans-serif;
+  font-size: 14.8px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  line-height: 24px;
+  padding: 54px 40px 40px;
+}
+#editor p {
+  line-height: 23.1px;
+  font-size: 12.8px;
+}
+
+.rm-first-page-header, .rm-page-header {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Responsive zoom for letter editor */
+.letter-zoom-wrapper {
+  zoom: 1;
+  transition: zoom 0.2s ease-in-out;
+}
+
+/* Scale up on medium screens (768px+) */
+@media (min-width: 768px) {
+  .letter-zoom-wrapper {
+    zoom: 1.2;
+  }
+}
+
+/* Scale up more on large screens (1024px+) */
+@media (min-width: 1024px) {
+  .letter-zoom-wrapper {
+    zoom: 1.4;
+  }
+}
+
+/* Scale up even more on extra large screens (1280px+) */
+@media (min-width: 1280px) {
+  .letter-zoom-wrapper {
+    zoom: 1.6;
+  }
+}
+
+/* Scale up maximum on 2xl screens (1536px+) */
+@media (min-width: 1536px) {
+  .letter-zoom-wrapper {
+    zoom: 1.8;
+  }
 }
