@@ -41,36 +41,57 @@
   visibility: hidden;
 }
 
-/* Responsive zoom for letter editor */
-.letter-zoom-wrapper {
-  zoom: 1;
-  transition: zoom 0.2s ease-in-out;
+/* Responsive letter editor using CSS custom properties */
+:root {
+  --letter-scale: 1;
+  --letter-base-width: 370px;
+  --letter-base-height: 518px;
+  --letter-base-font-size: 12.8px;
+  --letter-base-line-height: 23.1px;
+  --letter-base-padding: 52px;
 }
 
-/* Scale up on medium screens (768px+) */
+/* Responsive breakpoints */
 @media (min-width: 768px) {
-  .letter-zoom-wrapper {
-    zoom: 1.2;
+  :root {
+    --letter-scale: 1.2;
   }
 }
 
-/* Scale up more on large screens (1024px+) */
 @media (min-width: 1024px) {
-  .letter-zoom-wrapper {
-    zoom: 1.4;
+  :root {
+    --letter-scale: 1.4;
   }
 }
 
-/* Scale up even more on extra large screens (1280px+) */
 @media (min-width: 1280px) {
-  .letter-zoom-wrapper {
-    zoom: 1.6;
+  :root {
+    --letter-scale: 1.6;
   }
 }
 
-/* Scale up maximum on 2xl screens (1536px+) */
 @media (min-width: 1536px) {
-  .letter-zoom-wrapper {
-    zoom: 1.8;
+  :root {
+    --letter-scale: 1.8;
   }
+}
+
+/* Apply scaling to letter editor */
+.letter-responsive {
+  width: calc(var(--letter-base-width) * var(--letter-scale));
+  font-size: calc(var(--letter-base-font-size) * var(--letter-scale));
+}
+
+.letter-responsive #editor p {
+  line-height: calc(var(--letter-base-line-height) * var(--letter-scale));
+  font-size: calc(var(--letter-base-font-size) * var(--letter-scale));
+}
+
+.letter-responsive .background-page {
+  width: calc(var(--letter-base-width) * var(--letter-scale)) !important;
+  height: calc(var(--letter-base-height) * var(--letter-scale)) !important;
+}
+
+.letter-responsive .EditorContent {
+  padding: calc(var(--letter-base-padding) * var(--letter-scale));
 }

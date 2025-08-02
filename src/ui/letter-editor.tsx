@@ -18,17 +18,16 @@ import {
   Heading1,
   Heading2,
   Github,
+  Plus,
 } from "lucide-react";
-import ListItem from "@tiptap/extension-list-item";
 import {
-  PaginationPlus,
   TableCellPlus,
   TableHeaderPlus,
   TablePlus,
   TableRowPlus,
 } from "tiptap-pagination-plus";
+import { PaginationPlus } from "../extensions/PaginationExtension";
 import { Button } from "./button";
-import { useState, useEffect, useRef } from "react";
 
 const config = {
   id: 3,
@@ -59,15 +58,22 @@ const config = {
 // pt 54 pb
 // 32
 
-const topPadding = 52;
-const lineHeight = 23.1;
+// Use exact values from config to avoid calculation mismatches
+const topPadding = config.top_padding;  // 54
+const lineHeight = config.context_line_height;  // 23
 const TiptapEditor = () => {
-  const [containerHeight, setContainerHeight] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
   // Calculate pagination values
   const pageHeight = config.max_line * lineHeight + topPadding * 2;
   const pageGap = 20;
-  const totalPageHeight = pageHeight + pageGap;
+  
+  // Function to add multiple pages
+  const addThreePages = () => {
+    if (editor) {
+      editor.commands.addPage();
+      editor.commands.addPage();
+      // editor.commands.addPage();
+    }
+  };
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -78,7 +84,6 @@ const TiptapEditor = () => {
       TableRowPlus,
       TableCellPlus,
       TableHeaderPlus,
-      ListItem,
       PaginationPlus.configure({
         pageHeight: pageHeight,
         pageGap: pageGap,
@@ -99,34 +104,23 @@ const TiptapEditor = () => {
     },
   });
 
-  // Watch container height and calculate number of pages needed
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    const observer = new ResizeObserver((entries) => {
-      // Debounce to prevent infinite loops from zoom changes
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        for (const entry of entries) {
-          // Get the actual content height, accounting for zoom
-          const height = entry.contentRect.height;
-          setContainerHeight(height);
-        }
-      }, 100);
-    });
+  // // Watch container height and calculate number of pages needed
+  // useEffect(() => {
+  //   const observer = new ResizeObserver((entries) => {
+  //     for (const entry of entries) {
+  //       setContainerHeight(entry.contentRect.height);
+  //     }
+  //   });
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
+  //   if (containerRef.current) {
+  //     observer.observe(containerRef.current);
+  //   }
 
-    return () => {
-      clearTimeout(timeoutId);
-      observer.disconnect();
-    };
-  }, []);
+  //   return () => observer.disconnect();
+  // }, []);
 
   // Calculate how many background pages we need
-  const numberOfPages = Math.ceil(containerHeight / totalPageHeight) + 1; // Add 1 for safety
+  const numberOfPages = 10 + 1; // Add 1 for safety
 
   if (!editor) {
     return null;
@@ -268,42 +262,91 @@ const TiptapEditor = () => {
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
+          <div className="border-l mx-1" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.commands.setZoom(1.0)}
+            title="Zoom 1.0"
+          >
+            <span className="text-xs">1.0x</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.commands.setZoom(1.3)}
+            title="Zoom 1.3"
+          >
+            <span className="text-xs">1.3x</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.commands.setZoom(1.5)}
+            title="Zoom 1.5"
+          >
+            <span className="text-xs">1.5x</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.commands.setZoom(2.0)}
+            title="Zoom 2.0"
+          >
+            <span className="text-xs">2.0x</span>
+          </Button>
+          <div className="border-l mx-1" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.commands.addPage()}
+            title="Add Page"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="ml-1 text-xs">+1</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={addThreePages}
+            title="Add 3 Pages"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="ml-1 text-xs">+3</span>
+          </Button>
         </div>
       </div>
-      <div className="letter-zoom-wrapper w-[370px] mx-auto">
+      <div
+        className="w-[370px] mx-auto editor-container relative overflow-hidden"
+        id="editor-container"
+      >
+        {/* Absolute positioned background container */}
         <div
-          className="editor-container relative overflow-hidden"
-          id="editor-container"
-          ref={containerRef}
+          className="absolute inset-0 pointer-events-none z-0 size-full overflow-visibl flex flex-col"
+          style={{ width: "370px", margin: "0 auto", gap: 20 }}
         >
-          {/* Absolute positioned background container */}
-          <div
-            className="absolute inset-0 pointer-events-none z-0 size-full overflow-visibl flex flex-col"
-            style={{ width: "370px", margin: "0 auto", gap: 20 }}
-          >
-            {Array.from({ length: numberOfPages }, (_, index) => (
-              <div
-                key={index}
-                style={{
-                  width: "370px",
-                  height: `${pageHeight}px`,
-                  backgroundImage: `url(${config.thumbnail_original})`,
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center top",
-                  flexShrink: 0,
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Editor content */}
-          <EditorContent
-            editor={editor}
-            className="w-full mb-5 mx-auto relative z-10"
-            id="editor"
-          />
+          {Array.from({ length: numberOfPages }, (_, index) => (
+            <div
+              key={index}
+              style={{
+                width: "370px",
+                height: `${pageHeight}px`,
+                backgroundImage: `url(${config.thumbnail_original})`,
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center top",
+                flexShrink: 0,
+              }}
+            />
+          ))}
         </div>
+
+        {/* Editor content */}
+        <EditorContent
+          editor={editor}
+          className="w-full mb-5 mx-auto relative z-10"
+          id="editor"
+        />
       </div>
     </div>
   );
