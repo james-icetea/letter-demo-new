@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vanilla Letter Writer Demo</title>
+    <style>
+        .letter-page {
+            margin-bottom: 20px;
+        }
+        .letter-textarea {
+            width: 500px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #222;
+            line-height: 24px;
+            resize: none;
+            display: block;
+            margin-bottom: 10px;
+            /* Hide scrollbar */
+            overflow: hidden;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        .letter-textarea::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    </style>
+</head>
+<body>
+    <h2>Vanilla JS Letter Writer Demo</h2>
+    <div id="letterBoxDemo"></div>
+    <script>
+    // Vanilla JS Letter Writer
+    function createLetterWriter(options) {
+        var maxLine = options && options.maxLine ? options.maxLine : 15;
+        var fontFamily = options && options.fontFamily ? options.fontFamily : 'Arial, sans-serif';
+        var fontSize = options && options.fontSize ? options.fontSize : '16px';
+        var color = options && options.color ? options.color : '#222';
+        var lineHeight = options && options.lineHeight ? options.lineHeight : '24px';
+        var width = options && options.width ? options.width : '500px';
+
+        var container = document.createElement('div');
+        container.id = 'vanillaLetterWriter';
+
+        function addPage(text) {
+            var pageDiv = document.createElement('div');
+            pageDiv.className = 'letter-page';
+            var pageNum = container.querySelectorAll('.letter-textarea').length + 1;
+            var pageLabel = document.createElement('p');
+            pageLabel.textContent = pageNum + ' 페이지';
+            pageDiv.appendChild(pageLabel);
+
+            var ta = document.createElement('textarea');
+            ta.className = 'letter-textarea';
+            ta.setAttribute('rows', maxLine);
+            ta.setAttribute('data-index', pageNum - 1);
+            ta.style.fontFamily = fontFamily;
+            ta.style.fontSize = fontSize;
+            ta.style.color = color;
+            ta.style.lineHeight = lineHeight;
+            ta.style.width = width;
+            ta.style.marginBottom = '10px';
+            if (text) ta.value = text;
+            pageDiv.appendChild(ta);
+            container.appendChild(pageDiv);
+        }
+
+        // Initial page
+        addPage('');
+
+        // Handle keydown for delete functionality
+        container.addEventListener('keydown', function(e) {
+            if (e.target.classList.contains('letter-textarea') && (e.key === 'Delete' || e.key === 'Backspace')) {
+                var textarea = e.target;
+                var currentText = textarea.value.trim();
+                
+                // Check if textarea is empty and not the only page
+                if (currentText === '' && container.querySelectorAll('.letter-textarea').length > 1) {
+                    var currentIndex = parseInt(textarea.getAttribute('data-index'));
+                    var previousIndex = currentIndex - 1;
+                    var previousTa = container.querySelector('.letter-textarea[data-index="' + previousIndex + '"]');
+                    
+                    // Only delete if there's a previous page to move cursor to
+                    if (previousTa) {
+                        console.log('Deleting empty page:', currentIndex + 1);
+                        
+                        // Remove the current page
+                        var pageDiv = textarea.closest('.letter-page');
+                        pageDiv.remove();
+                        
+                        // Move cursor to end of previous textarea
+                        previousTa.focus();
+                        previousTa.setSelectionRange(previousTa.value.length, previousTa.value.length);
+                        
+                        // Update data-index attributes for remaining pages
+                        var remainingTextareas = container.querySelectorAll('.letter-textarea');
+                        remainingTextareas.forEach(function(ta, index) {
+                            ta.setAttribute('data-index', index);
+                            var pageLabel = ta.closest('.letter-page').querySelector('p');
+                            pageLabel.textContent = (index + 1) + ' 페이지';
+                        });
+                        
+                        console.log('Moved cursor to previous page:', previousIndex + 1);
+                        
+                        // Prevent default delete behavior
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+
+        // Event delegation for input (exact PHP logic - simple and direct)
+        container.addEventListener('input', function(e) {
+            if (e.target.classList.contains('letter-textarea')) {
+                var textarea = e.target;
+                var currentText = textarea.value;
+                var removedChars = '';
+                var maxHeight = Math.ceil(textarea.clientHeight + 1);
+                
+                // Store cursor position before overflow check
+                var cursorPosition = textarea.selectionStart;
+                var textLength = currentText.length;
+                var isCursorAtEnd = cursorPosition === textLength;
+                
+                console.log('Input event - scrollHeight:', textarea.scrollHeight, 'maxHeight:', maxHeight);
+                console.log('Cursor position:', cursorPosition, 'Text length:', textLength, 'At end:', isCursorAtEnd);
+                
+                // Direct scrollHeight check (exact PHP logic)
+                if (textarea.scrollHeight > maxHeight) {
+                    console.log('Overflow detected, starting character removal...');
+                    
+                    // Remove characters one by one until scrollbar disappears (exact PHP logic)
+                    while (textarea.scrollHeight > maxHeight) {
+                        removedChars = currentText.slice(-1) + removedChars;
+                        currentText = currentText.slice(0, -1);
+                        textarea.value = currentText; // Update immediately like PHP
+                        
+                        console.log('Removed char:', removedChars.charAt(0), 'scrollHeight:', textarea.scrollHeight, 'maxHeight:', maxHeight);
+                        
+                        // Safety break
+                        if (currentText.length === 0) break;
+                    }
+                    
+                    console.log('Character removal complete. Total removed:', removedChars.length, 'characters');
+                    
+                    var index = parseInt(textarea.getAttribute('data-index'));
+                    var nextIndex = index + 1;
+                    var nextTa = container.querySelector('.letter-textarea[data-index="' + nextIndex + '"]');
+                    
+                    // Add new page if needed
+                    if (!nextTa) {
+                        addPage('');
+                        nextTa = container.querySelector('.letter-textarea[data-index="' + nextIndex + '"]');
+                    }
+                    
+                    // Remove leading spaces from overflow text
+                    removedChars = removedChars.replace(/^\s+/, "");
+                    
+                    // Handle cursor positioning based on original position
+                    if (isCursorAtEnd) {
+                        // Cursor was at end - move removed chars to next page and position cursor after them
+                        if (removedChars.trim() !== "") {
+                            nextTa.value = removedChars + nextTa.value;
+                            console.log('Added to next textarea:', removedChars);
+                            
+                            // Focus and position cursor after the moved text (only if this is direct overflow)
+                            // Don't move cursor if this is cascade overflow from previous page
+                            if (textarea === document.activeElement) {
+                                nextTa.focus();
+                                nextTa.setSelectionRange(removedChars.length, removedChars.length);
+                                console.log('Cursor positioned at:', removedChars.length, 'in next textarea');
+                            }
+                        }
+                    } else {
+                        // Cursor was in middle - maintain current cursor position in current textarea
+                        var newCursorPosition = Math.min(cursorPosition, currentText.length);
+                        textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+                        console.log('Cursor maintained at position:', newCursorPosition);
+                        
+                        // Add overflow text to next textarea if not empty
+                        if (removedChars.trim() !== "") {
+                            nextTa.value = removedChars + nextTa.value;
+                            console.log('Added to next textarea:', removedChars);
+                        }
+                    }
+                    
+                    // Trigger input event on next textarea (exact PHP logic)
+                    var event = new Event('input', { bubbles: true });
+                    nextTa.dispatchEvent(event);
+                } else {
+                    console.log('Text fits, no action needed');
+                }
+            }
+        });
+
+        var target = options && options.target ? document.querySelector(options.target) : document.body;
+        target.appendChild(container);
+    }
+
+    // Example usage
+    createLetterWriter({
+        maxLine: 4,
+        fontFamily: 'Arial',
+        fontSize: '16px',
+        color: '#333',
+        lineHeight: '24px',
+        width: '100px',
+        target: '#letterBoxDemo'
+    });
+    </script>
+</body>
+</html>
