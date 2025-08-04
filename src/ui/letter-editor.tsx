@@ -54,7 +54,7 @@ import { Button } from "./button";
 
 const config = {
   thumbnail_original:
-    "https://dongl.s3.ap-northeast-2.amazonaws.com/letter-attachment/temp3-front.jpg",
+    "https://dongl.co.kr/assets/upload/onebon_1742830602_007070_0.jpeg",
   top_padding: 54,
   inline_padding: 40,
   context_width: 292,
@@ -108,7 +108,8 @@ const TiptapEditor = () => {
         pageFooterHeight:
           pageHeight -
           config.top_padding -
-          config.max_line * config.context_line_height, // Use same as header for now
+          config.max_line * config.context_line_height -
+          1, // Use same as header for now
         headerLeft: "sr-only",
       }),
     ],
@@ -148,10 +149,9 @@ const TiptapEditor = () => {
   }
 
   return (
-    <div className="">
+    <div>
       <div className="sticky top-0 z-[10] pt-8">
         <div
-          hidden
           className="border rounded-lg shadow-sm p-2 bg-muted/90 flex flex-wrap gap-1 backdrop-blur-md"
         >
           <div className="flex flex-wrap gap-0.5">
@@ -310,17 +310,18 @@ const TiptapEditor = () => {
         </div>
       </div>
       <div
-        className=" mx-auto editor-container relative overflow-hidden"
+        className="mx-auto editor-container relative overflow-hidden sheet"
         style={{ width: pageWidth }}
         id="editor-container"
       >
         <div
-          className="w-full absolute inset-0 pointer-events-none z-0 size-full overflow-visibl flex flex-col"
+          className="w-full absolute image-container inset-0 pointer-events-none z-0 size-full overflow-visibl flex flex-col"
           style={{ margin: "0 auto", gap: 20 }}
         >
           {Array.from({ length: numberOfPages }, (_, index) => (
             <div
               key={index}
+              className="image-bg"
               style={{
                 width: "100%",
                 height: `${pageHeight}px`,
@@ -334,11 +335,7 @@ const TiptapEditor = () => {
           ))}
         </div>
 
-        <EditorContent
-          editor={editor}
-          className="w-full mb-5 mx-auto relative z-10"
-          id="editor"
-        />
+        <EditorContent editor={editor} className="w-full mx-auto" id="editor" />
       </div>
     </div>
   );

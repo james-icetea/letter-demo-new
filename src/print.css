@@ -1,0 +1,51 @@
+@page a4sheet {
+  size: 19cm 26cm;
+}
+
+@page lettersheet {
+  size: 15cm 21cm;
+  margin: 0mm;
+}
+
+@page noLettersheet {
+  size: 15cm 21cm;
+}
+
+/* A4 sheet - the outer container */
+.a4sheet {
+  page: a4sheet;
+  page-break-after: always;
+  width: 19cm;
+  height: 26cm;
+  margin: 0 auto 20px auto;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Print styles */
+@media print {
+  .sheet {
+    zoom: 1.475;
+  }
+  .image-container {
+    gap: 0;
+  }
+  .image-bg {
+    page-break-after: always;
+  }
+  .rm-page-footer {
+    page-break-after: always;
+  }
+  body {
+    padding: 0;
+    background-color: white;
+  }
+}
+
+@page {
+  margin-top: 3cm;
+}

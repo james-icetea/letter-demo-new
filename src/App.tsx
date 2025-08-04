@@ -4,7 +4,7 @@ import { Loader } from "lucide-react";
 import { Suspense } from "react";
 import { cn } from "./lib/utils";
 import LetterDemo from "./pages/LetterDemo";
-
+import './print.css'
 function App() {
   return (
     <>
