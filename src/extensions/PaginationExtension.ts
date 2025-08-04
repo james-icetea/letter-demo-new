@@ -18,8 +18,6 @@ interface PaginationPlusOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     pagination: {
-      setZoom: (zoom: number) => ReturnType
-      getZoom: () => ReturnType
       insertPageBreak: () => ReturnType
       addPage: () => ReturnType
     }
@@ -71,23 +69,6 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
 
   addCommands() {
     return {
-      setZoom:
-        (zoom: number) =>
-        ({ editor }) => {
-          ZoomManager.setZoom(zoom);
-          // Apply zoom to the editor container
-          const editorDom = editor.view.dom.closest('.editor-container') as HTMLElement;
-          if (editorDom) {
-            editorDom.style.zoom = zoom.toString();
-          }
-          return true;
-        },
-      getZoom:
-        () =>
-        () => {
-          ZoomManager.getZoom();
-          return true;
-        },
       insertPageBreak:
         () =>
         ({ commands }) => {

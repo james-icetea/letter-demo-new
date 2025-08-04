@@ -1,6 +1,7 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import { useState, useEffect } from "react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
@@ -27,6 +28,23 @@ import {
 } from "tiptap-pagination-plus";
 import { PaginationPlus } from "../extensions/PaginationExtension";
 import { Button } from "./button";
+
+// Custom hook for media query
+const useMediaQuery = (query: string): boolean => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    media.addListener(listener);
+    return () => media.removeListener(listener);
+  }, [matches, query]);
+
+  return matches;
+};
 
 // const config = {
 //   id: 3,
@@ -72,7 +90,7 @@ const config = {
 const mul = 5 / 7;
 const TiptapEditor = () => {
   // Calculate pagination values
-  const pageWidth = 385;
+  const pageWidth = 385 * 1.5;
   const pageHeight = pageWidth / mul;
   const pageGap = 20;
 
@@ -102,14 +120,13 @@ const TiptapEditor = () => {
       // }),
       PaginationPlus.configure({
         pageHeight: pageHeight,
-        pageGap: pageGap,
+        pageGap: pageGap * 1.5,
         pageBreakBackground: "transparent",
-        pageHeaderHeight: config.top_padding,
+        pageHeaderHeight: config.top_padding * 1.5,
         pageFooterHeight:
           pageHeight -
-          config.top_padding -
-          config.max_line * config.context_line_height -
-          1, // Use same as header for now
+          config.top_padding * 1.5 -
+          config.max_line * config.context_line_height * 1.5, // Use same as header for now
         headerLeft: "sr-only",
       }),
     ],
@@ -118,7 +135,7 @@ const TiptapEditor = () => {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] px-10",
+          "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none",
       },
     },
     onUpdate: ({ editor }) => {
@@ -151,9 +168,7 @@ const TiptapEditor = () => {
   return (
     <div>
       <div className="sticky top-0 z-[10] pt-8">
-        <div
-          className="border rounded-lg shadow-sm p-2 bg-muted/90 flex flex-wrap gap-1 backdrop-blur-md"
-        >
+        <div className="border rounded-lg shadow-sm p-2 bg-muted/90 flex flex-wrap gap-1 backdrop-blur-md">
           <div className="flex flex-wrap gap-0.5">
             <Button
               variant="ghost"
@@ -267,10 +282,10 @@ const TiptapEditor = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => editor.commands.setZoom(1.3)}
-            title="Zoom 1.3"
+            onClick={() => editor.commands.setZoom(1.5)}
+            title="Zoom 1.5"
           >
-            <span className="text-xs">1.3x</span>
+            <span className="text-xs">1.5x</span>
           </Button>
           <Button
             variant="ghost"
@@ -316,7 +331,7 @@ const TiptapEditor = () => {
       >
         <div
           className="w-full absolute image-container inset-0 pointer-events-none z-0 size-full overflow-visibl flex flex-col"
-          style={{ margin: "0 auto", gap: 20 }}
+          style={{ margin: "0 auto", gap: 20 * 1.5 }}
         >
           {Array.from({ length: numberOfPages }, (_, index) => (
             <div
@@ -324,7 +339,7 @@ const TiptapEditor = () => {
               className="image-bg"
               style={{
                 width: "100%",
-                height: `${pageHeight}px`,
+                height: pageHeight,
                 backgroundImage: `url(${config.thumbnail_original})`,
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
@@ -335,7 +350,14 @@ const TiptapEditor = () => {
           ))}
         </div>
 
-        <EditorContent editor={editor} className="w-full mx-auto" id="editor" />
+        <EditorContent
+          editor={editor}
+          className="w-full mx-auto"
+          id="editor"
+          style={{
+            paddingInline: 40 * 1.5,
+          }}
+        />
       </div>
     </div>
   );
