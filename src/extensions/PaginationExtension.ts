@@ -7,6 +7,7 @@ interface PaginationPlusOptions {
   pageGap: number;
   pageBreakBackground: string;
   pageHeaderHeight: number;
+  pageFooterHeight: number;
   pageGapBorderSize: number;
   footerRight: string;
   footerLeft: string;
@@ -51,12 +52,6 @@ const ZoomManager = {
     };
   }
 };
-
-// Helper function to get current zoom - use managed zoom instead of detecting
-const getZoomLevel = (): number => {
-  return ZoomManager.getZoom();
-};
-
 export const PaginationPlus = Extension.create<PaginationPlusOptions>({
   name: "PaginationPlus",
   addOptions() {
@@ -66,6 +61,7 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
       pageGapBorderSize: 1,
       pageBreakBackground: "#ffffff",
       pageHeaderHeight: 10,
+      pageFooterHeight: 10,
       footerRight: "{page}",
       footerLeft: "",
       headerRight: "",
@@ -89,7 +85,8 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
       getZoom:
         () =>
         () => {
-          return ZoomManager.getZoom();
+          ZoomManager.getZoom();
+          return true;
         },
       insertPageBreak:
         () =>
@@ -126,9 +123,9 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
   onCreate() {
     const targetNode = this.editor.view.dom;
     targetNode.classList.add("rm-with-pagination");
-    const config = { attributes: true };
     const _pageHeaderHeight = this.options.pageHeaderHeight;
-    const _pageHeight = this.options.pageHeight - _pageHeaderHeight * 2;
+    const _pageFooterHeight = this.options.pageFooterHeight;
+    const _pageHeight = Math.max(100, this.options.pageHeight - _pageHeaderHeight - _pageFooterHeight);
 
     const style = document.createElement("style");
     style.dataset.rmPaginationStyle = "";
@@ -230,7 +227,7 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
     let isZoomChanging = false;
     
     // Listen for zoom changes to pause pagination updates
-    const unsubscribeZoom = ZoomManager.onZoomChange(() => {
+    ZoomManager.onZoomChange(() => {
       isZoomChanging = true;
       setTimeout(() => {
         isZoomChanging = false;
@@ -238,8 +235,7 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
     });
     
     const callback = (
-      mutationList: MutationRecord[],
-      observer: MutationObserver
+      mutationList: MutationRecord[]
     ) => {
       // Skip all updates during zoom changes
       if (isZoomChanging) return;
@@ -308,7 +304,7 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
             const widgetList = createDecoration(state, pageOptions);
             return DecorationSet.create(state.doc, widgetList);
           },
-          apply(tr, oldDeco, oldState, newState) {
+          apply(tr, oldDeco, _oldState, newState) {
             // Only recalculate if there are actual document changes, not just zoom/style changes
             if (!tr.docChanged && !tr.getMeta(page_count_meta_key)) {
               return oldDeco;
@@ -351,17 +347,15 @@ const getExistingPageCount = (view: EditorView) => {
   }
   return 0;
 };
-
 const calculatePageCount = (
   view: EditorView,
   pageOptions: PaginationPlusOptions
 ) => {
   const editorDom = view.dom;
-  const pageContentAreaHeight =
-    pageOptions.pageHeight - pageOptions.pageHeaderHeight * 2;
+  const pageContentAreaHeight = Math.max(100,
+    pageOptions.pageHeight - pageOptions.pageHeaderHeight - pageOptions.pageFooterHeight);
   const paginationElement = editorDom.querySelector("[data-rm-pagination]");
   const currentPageCount = getExistingPageCount(view);
-  
   if (paginationElement) {
     const lastElementOfEditor = editorDom.lastElementChild;
     const lastPageBreak =
@@ -375,8 +369,8 @@ const calculatePageCount = (
         const calculatedPages = currentPageCount + addPage;
         return Math.max(calculatedPages, manualPageCount);
       } else {
-        const lpFrom = -pageOptions.pageHeaderHeight;
-        const lpTo = -(pageOptions.pageHeight - pageOptions.pageHeaderHeight);
+        const lpFrom = -pageOptions.pageFooterHeight;
+        const lpTo = -(pageOptions.pageHeight - pageOptions.pageFooterHeight);
         if (lastPageGap > lpTo && lastPageGap < lpFrom) {
           return Math.max(currentPageCount, manualPageCount);
         } else if (lastPageGap < lpTo) {
@@ -399,7 +393,7 @@ const calculatePageCount = (
 };
 
 function createDecoration(
-  state: EditorState,
+  _state: EditorState,
   pageOptions: PaginationPlusOptions,
   isInitial: boolean = false
 ): Decoration[] {
@@ -408,10 +402,10 @@ function createDecoration(
     (view) => {
       const _pageGap = pageOptions.pageGap;
       const _pageHeaderHeight = pageOptions.pageHeaderHeight;
-      const _pageHeight = pageOptions.pageHeight - _pageHeaderHeight * 2;
+      const _pageFooterHeight = pageOptions.pageFooterHeight;
+      const _pageHeight = Math.max(100, pageOptions.pageHeight - _pageHeaderHeight - _pageFooterHeight);
       const _pageBreakBackground = pageOptions.pageBreakBackground;
 
-      // Get actual container width - don't normalize as this affects layout consistency
       const breakerWidth = view.dom.clientWidth;
 
       const el = document.createElement("div");
@@ -419,10 +413,9 @@ function createDecoration(
 
       const pageBreakDefinition = ({
         firstPage = false,
-        lastPage = false,
       }: {
         firstPage: boolean;
-        lastPage: boolean;
+        lastPage?: boolean;
       }) => {
         const pageContainer = document.createElement("div");
         pageContainer.classList.add("rm-page-break");
@@ -450,7 +443,7 @@ function createDecoration(
 
         const pageFooter = document.createElement("div");
         pageFooter.classList.add("rm-page-footer");
-        pageFooter.style.height = _pageHeaderHeight + "px";
+        pageFooter.style.height = _pageFooterHeight + "px";
 
         const footerRight = pageOptions.footerRight.replace(
           "{page}",
@@ -471,6 +464,7 @@ function createDecoration(
 
         pageFooter.append(pageFooterLeft);
         pageFooter.append(pageFooterRight);
+
 
         const pageSpace = document.createElement("div");
         pageSpace.classList.add("rm-pagination-gap");
@@ -503,10 +497,9 @@ function createDecoration(
         return pageContainer;
       };
 
-      const page = pageBreakDefinition({ firstPage: false, lastPage: false });
+      const page = pageBreakDefinition({ firstPage: false });
       const firstPage = pageBreakDefinition({
         firstPage: true,
-        lastPage: false,
       });
       const fragment = document.createDocumentFragment();
 

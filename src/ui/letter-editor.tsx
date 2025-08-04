@@ -17,7 +17,6 @@ import {
   Code,
   Heading1,
   Heading2,
-  Github,
   Plus,
 } from "lucide-react";
 import {
@@ -28,52 +27,62 @@ import {
 } from "tiptap-pagination-plus";
 import { PaginationPlus } from "../extensions/PaginationExtension";
 import { Button } from "./button";
-import { EmptyPlaceholderExtension, EmptyPlaceholderNode } from "@/extensions/EmptyPlaceholderExtension";
+
+// const config = {
+//   id: 3,
+//   letter_category_id: 9,
+//   name: "연보라",
+//   price: 1000,
+//   thumbnail:
+//     "https://dongl.s3.ap-northeast-2.amazonaws.com/letter-attachment/temp3-front.jpg",
+//   thumbnail_back:
+//     "https://dongl.s3.ap-northeast-2.amazonaws.com/letter-attachment/temp3-back.jpg",
+//   thumbnail_original:
+//     "https://dongl.s3.ap-northeast-2.amazonaws.com/letter-attachment/temp3-front.jpg",
+//   top_padding: 54,
+//   context_width: 292,
+//   context_height: 431,
+//   context_line_height: 23.1,
+//   max_line: 18,
+//   sort_order: 0,
+//   is_active: true,
+//   count: 0,
+//   tags: null,
+//   created_at: "2025-07-27T02:45:30.998Z",
+//   updated_at: "2025-07-27T02:45:30.998Z",
+// };
 
 const config = {
-  id: 3,
-  letter_category_id: 9,
-  name: "연보라",
-  price: 1000,
-  thumbnail:
-    "https://dongl.s3.ap-northeast-2.amazonaws.com/letter-attachment/temp3-front.jpg",
-  thumbnail_back:
-    "https://dongl.s3.ap-northeast-2.amazonaws.com/letter-attachment/temp3-back.jpg",
   thumbnail_original:
     "https://dongl.s3.ap-northeast-2.amazonaws.com/letter-attachment/temp3-front.jpg",
   top_padding: 54,
+  inline_padding: 40,
   context_width: 292,
   context_height: 431,
-  context_line_height: 23,
+  context_line_height: 24,
   max_line: 18,
-  sort_order: 0,
-  is_active: true,
-  count: 0,
-  tags: null,
-  created_at: "2025-07-27T02:45:30.998Z",
-  updated_at: "2025-07-27T02:45:30.998Z",
+  height: 777,
 };
-
 //500 700
 // 370 518
 // pt 54 pb
 // 32
 
 // Use exact values from config to avoid calculation mismatches
-const topPadding = config.top_padding; // 54
-const lineHeight = config.context_line_height; // 23
+const mul = 5 / 7;
 const TiptapEditor = () => {
   // Calculate pagination values
-  const pageHeight = config.max_line * lineHeight + topPadding * 2;
+  const pageWidth = 385;
+  const pageHeight = pageWidth / mul;
   const pageGap = 20;
 
   // Function to add multiple pages
   const addThreePages = () => {
-    if (editor) {
-      editor.commands.addPage();
-      editor.commands.addPage();
-      // editor.commands.addPage();
-    }
+    // if (editor) {
+    //   editor.commands.addPage();
+    //   editor.commands.addPage();
+    //   // editor.commands.addPage();
+    // }
   };
   const editor = useEditor({
     extensions: [
@@ -85,22 +94,26 @@ const TiptapEditor = () => {
       TableRowPlus,
       TableCellPlus,
       TableHeaderPlus,
-      EmptyPlaceholderNode,
-      EmptyPlaceholderExtension.configure({
-        initialPages: 3,
-        placeholderClass: "empty-placehoder",
-        linesPerPage: 17,
-        placeholderText: "",
-      }),
+      // EmptyPlaceholderExtension.configure({
+      //   initialPages: 3,
+      //   placeholderClass: "empty-placehoder",
+      //   linesPerPage: 17,
+      //   placeholderText: "",
+      // }),
       PaginationPlus.configure({
         pageHeight: pageHeight,
         pageGap: pageGap,
         pageBreakBackground: "transparent",
-        pageHeaderHeight: topPadding,
+        pageHeaderHeight: config.top_padding,
+        pageFooterHeight:
+          pageHeight -
+          config.top_padding -
+          config.max_line * config.context_line_height, // Use same as header for now
         headerLeft: "sr-only",
       }),
     ],
-    content: undefined,
+    content:
+      "<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>",
     editorProps: {
       attributes: {
         class:
@@ -137,38 +150,10 @@ const TiptapEditor = () => {
   return (
     <div className="">
       <div className="sticky top-0 z-[10] pt-8">
-        <div className="w-full mb-1 flex flex-row gap-2 justify-between">
-          <div className="inline-flex flex-row gap-2">
-            <a
-              href="https://github.com/RomikMakavana/tiptap-pagination"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="ghost" size="sm" className="!bg-black">
-                <Github className="h-4 w-4 text-white" />
-              </Button>
-            </a>
-            <iframe
-              src="https://github.com/sponsors/RomikMakavana/button"
-              title="Sponsor RomikMakavana"
-              height="32"
-              width="114"
-              style={{ border: "0", borderRadius: "6px" }}
-            ></iframe>
-          </div>
-          <a
-            href="https://www.buymeacoffee.com/romikmakavana"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
-              alt="Buy Me A Coffee"
-              style={{ height: "35px", width: "132px" }}
-            />
-          </a>
-        </div>
-        <div className="border rounded-lg shadow-sm p-2 bg-muted/90 flex flex-wrap gap-1 backdrop-blur-md">
+        <div
+          hidden
+          className="border rounded-lg shadow-sm p-2 bg-muted/90 flex flex-wrap gap-1 backdrop-blur-md"
+        >
           <div className="flex flex-wrap gap-0.5">
             <Button
               variant="ghost"
@@ -325,19 +310,19 @@ const TiptapEditor = () => {
         </div>
       </div>
       <div
-        className="w-[370px] mx-auto editor-container relative overflow-hidden"
+        className=" mx-auto editor-container relative overflow-hidden"
+        style={{ width: pageWidth }}
         id="editor-container"
       >
-        {/* Absolute positioned background container */}
         <div
-          className="absolute inset-0 pointer-events-none z-0 size-full overflow-visibl flex flex-col"
-          style={{ width: "370px", margin: "0 auto", gap: 20 }}
+          className="w-full absolute inset-0 pointer-events-none z-0 size-full overflow-visibl flex flex-col"
+          style={{ margin: "0 auto", gap: 20 }}
         >
           {Array.from({ length: numberOfPages }, (_, index) => (
             <div
               key={index}
               style={{
-                width: "370px",
+                width: "100%",
                 height: `${pageHeight}px`,
                 backgroundImage: `url(${config.thumbnail_original})`,
                 backgroundSize: "contain",
@@ -349,7 +334,6 @@ const TiptapEditor = () => {
           ))}
         </div>
 
-        {/* Editor content */}
         <EditorContent
           editor={editor}
           className="w-full mb-5 mx-auto relative z-10"
