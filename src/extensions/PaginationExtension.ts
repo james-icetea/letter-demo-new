@@ -251,17 +251,20 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
         if (mutationList.length > 0 && mutationList[0].target) {
           const _target = mutationList[0].target as HTMLElement;
           if (_target.classList.contains("rm-with-pagination")) {
-            // Only process actual content changes to prevent blinking
+            // Process content changes including empty placeholders
             const isContentMutation = mutationList.some(mutation => {
               if (mutation.type === 'childList') {
-                // Check for text nodes or non-pagination elements
+                // Check for text nodes, paragraphs, or non-pagination elements
                 return Array.from(mutation.addedNodes).some(node => 
                   node.nodeType === Node.TEXT_NODE || 
                   (node.nodeType === Node.ELEMENT_NODE && 
                    !(node as Element).hasAttribute('data-rm-pagination') &&
                    !(node as Element).classList.contains('rm-page-break') &&
                    !(node as Element).classList.contains('breaker') &&
-                   !(node as Element).classList.contains('manual-page-break'))
+                   !(node as Element).classList.contains('manual-page-break')) ||
+                  // Also include empty placeholder nodes
+                  (node.nodeType === Node.ELEMENT_NODE && 
+                   (node as Element).classList.contains('empty-placeholder'))
                 );
               }
               return false;

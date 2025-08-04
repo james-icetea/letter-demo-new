@@ -28,6 +28,7 @@ import {
 } from "tiptap-pagination-plus";
 import { PaginationPlus } from "../extensions/PaginationExtension";
 import { Button } from "./button";
+import { EmptyPlaceholderExtension, EmptyPlaceholderNode } from "@/extensions/EmptyPlaceholderExtension";
 
 const config = {
   id: 3,
@@ -59,13 +60,13 @@ const config = {
 // 32
 
 // Use exact values from config to avoid calculation mismatches
-const topPadding = config.top_padding;  // 54
-const lineHeight = config.context_line_height;  // 23
+const topPadding = config.top_padding; // 54
+const lineHeight = config.context_line_height; // 23
 const TiptapEditor = () => {
   // Calculate pagination values
   const pageHeight = config.max_line * lineHeight + topPadding * 2;
   const pageGap = 20;
-  
+
   // Function to add multiple pages
   const addThreePages = () => {
     if (editor) {
@@ -84,6 +85,13 @@ const TiptapEditor = () => {
       TableRowPlus,
       TableCellPlus,
       TableHeaderPlus,
+      EmptyPlaceholderNode,
+      EmptyPlaceholderExtension.configure({
+        initialPages: 3,
+        placeholderClass: "empty-placehoder",
+        linesPerPage: 17,
+        placeholderText: "",
+      }),
       PaginationPlus.configure({
         pageHeight: pageHeight,
         pageGap: pageGap,
