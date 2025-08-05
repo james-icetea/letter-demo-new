@@ -25,7 +25,7 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
       pageBreakBackground: "#ffffff",
       pageHeaderHeight: 10,
       pageFooterHeight: 10,
-      footerRight: "",
+      footerRight: "1",
       footerLeft: "",
       headerRight: "",
       headerLeft: "",

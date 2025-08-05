@@ -6,6 +6,8 @@ interface EmptyPlaceholderOptions {
   initialPages: number;
   placeholderClass: string;
   placeholderText: string;
+  lineHeight: number;
+  minLinesPerPage: number;
 }
 
 declare module "@tiptap/core" {
@@ -61,8 +63,11 @@ export const EmptyPlaceholderExtension =
         initialPages: 3,
         placeholderClass: "empty-placeholder",
         placeholderText: "",
+        lineHeight: 23,
+        minLinesPerPage: 1,
       };
     },
+
 
     addCommands() {
       return {
@@ -91,12 +96,63 @@ export const EmptyPlaceholderExtension =
 
         addEmptyPage:
           () =>
-          ({ commands }) => {
-            const emptyLines = Array(this.options.linesPerPage)
+          ({ commands, editor }) => {
+            // Calculate how many lines we need to add to create exactly one more page
+            const calculateRequiredLines = () => {
+              const editorDom = editor.view.dom;
+              
+              // Get current page footers to know current page count
+              const pageFooters = editorDom.querySelectorAll('.rm-page-footer');
+              const currentPageCount = pageFooters.length || 1;
+              
+              // Calculate total lines that should exist for (currentPages + 1)
+              const targetPages = currentPageCount + 1;
+              const totalLinesNeeded = targetPages * this.options.linesPerPage;
+              
+              // Count existing content lines (excluding empty placeholders)
+              const contentNodes = editorDom.querySelectorAll('p:not(.empty-placeholder)');
+              const emptyPlaceholders = editorDom.querySelectorAll('.empty-placeholder');
+              
+              const currentContentLines = contentNodes.length;
+              const currentEmptyLines = emptyPlaceholders.length;
+              const currentTotalLines = currentContentLines + currentEmptyLines;
+              
+              // Calculate how many more lines we need
+              const linesToAdd = Math.max(1, totalLinesNeeded - currentTotalLines);
+              
+              console.log('Add page calculation:', {
+                currentPageCount,
+                targetPages,
+                totalLinesNeeded,
+                currentContentLines,
+                currentEmptyLines,
+                currentTotalLines,
+                linesToAdd
+              });
+              
+              return linesToAdd;
+            };
+            
+            const requiredLines = calculateRequiredLines();
+            const emptyLines = Array(requiredLines)
               .fill(null)
               .map(() => ({ type: "emptyPlaceholder" }));
 
-            commands.insertContent(emptyLines);
+            // Get the end position of the document
+            const docSize = editor.state.doc.content.size;
+
+            // Insert content at the end of the document
+            commands.insertContentAt(docSize, emptyLines);
+
+            // Trigger pagination update to recognize the new page
+            setTimeout(() => {
+              const tr = editor.view.state.tr.setMeta(
+                "PAGE_COUNT_META_KEY",
+                Date.now()
+              );
+              editor.view.dispatch(tr);
+            }, 100);
+
             return true;
           },
 
@@ -116,11 +172,8 @@ export const EmptyPlaceholderExtension =
       style.dataset.emptyPlaceholderStyle = "";
       style.textContent = `
       .empty-placeholder {
-        min-height: 23px; /* Line height from config */
-        opacity: 0.3;
         position: relative;
         cursor: text;
-        line-height: 23px;
       }
       
       .empty-placeholder:empty::before {
@@ -144,17 +197,17 @@ export const EmptyPlaceholderExtension =
     `;
       document.head.appendChild(style);
 
-      // Automatically initialize empty pages when the extension is created
-      // Delay to ensure PaginationPlus is ready
-      setTimeout(() => {
-        this.editor.commands.initializeEmptyPages();
+      // // Automatically initialize empty pages when the extension is created
+      // // Delay to ensure PaginationPlus is ready
+      // setTimeout(() => {
+      //   this.editor.commands.initializeEmptyPages();
 
-        // Trigger pagination recalculation after adding content
-        setTimeout(() => {
-          const event = new Event("resize");
-          window.dispatchEvent(event);
-        }, 200);
-      }, 200); // Increased delay for pagination extension
+      //   // Trigger pagination recalculation after adding content
+      //   setTimeout(() => {
+      //     const event = new Event("resize");
+      //     window.dispatchEvent(event);
+      //   }, 200);
+      // }, 200); // Increased delay for pagination extension
     },
 
     addStorage() {
@@ -172,42 +225,50 @@ export const EmptyPlaceholderExtension =
       const findAndRemoveEmptyPlaceholder = (view: any) => {
         if (isProcessing) return false;
         isProcessing = true;
-        
+
         try {
           const { state } = view;
           const { selection } = state;
           const cursorPos = selection.from;
-          
+
           // Tìm tất cả EmptyPlaceholderNode rỗng trong document
-          const emptyPlaceholders: Array<{pos: number, node: any}> = [];
-          
+          const emptyPlaceholders: Array<{ pos: number; node: any }> = [];
+
           state.doc.descendants((node: any, pos: number) => {
-            if (node.type.name === "emptyPlaceholder" && node.textContent.trim() === "") {
+            if (
+              node.type.name === "emptyPlaceholder" &&
+              node.textContent.trim() === ""
+            ) {
               emptyPlaceholders.push({ pos, node });
             }
           });
-          
-          console.log('Found empty placeholders:', emptyPlaceholders.length);
-          console.log('Cursor position:', cursorPos);
-          
+
+          console.log("Found empty placeholders:", emptyPlaceholders.length);
+          console.log("Cursor position:", cursorPos);
+
           // Tìm EmptyPlaceholderNode rỗng đầu tiên sau cursor
-          const targetPlaceholder = emptyPlaceholders.find(p => p.pos >= cursorPos);
-          
+          const targetPlaceholder = emptyPlaceholders.find(
+            (p) => p.pos >= cursorPos
+          );
+
           if (targetPlaceholder) {
-            console.log('Removing placeholder at position:', targetPlaceholder.pos);
+            console.log(
+              "Removing placeholder at position:",
+              targetPlaceholder.pos
+            );
             const tr = state.tr.delete(
               targetPlaceholder.pos,
               targetPlaceholder.pos + targetPlaceholder.node.nodeSize
             );
             view.dispatch(tr);
-            console.log('Successfully removed placeholder');
+            console.log("Successfully removed placeholder");
             isProcessing = false;
             return true;
           } else {
-            console.log('No empty placeholder found after cursor');
+            console.log("No empty placeholder found after cursor");
           }
         } catch (error) {
-          console.error('Error in findAndRemoveEmptyPlaceholder:', error);
+          console.error("Error in findAndRemoveEmptyPlaceholder:", error);
         }
 
         isProcessing = false;
@@ -223,7 +284,10 @@ export const EmptyPlaceholderExtension =
           "p.empty-placeholder"
         );
 
-        console.log('Checking text wrapping, found elements:', placeholderElements.length);
+        console.log(
+          "Checking text wrapping, found elements:",
+          placeholderElements.length
+        );
 
         // Chỉ kiểm tra các element có nội dung (không rỗng)
         for (const element of placeholderElements) {
@@ -235,16 +299,26 @@ export const EmptyPlaceholderExtension =
           const currentHeight = htmlElement.offsetHeight;
           const cachedHeight = nodeHeightCache.get(htmlElement);
           const expectedSingleLineHeight = 23;
-          
-          console.log('Element text:', htmlElement.textContent?.substring(0, 20));
-          console.log('Current height:', currentHeight, 'Expected:', expectedSingleLineHeight, 'Cached:', cachedHeight);
-          
+
+          console.log(
+            "Element text:",
+            htmlElement.textContent?.substring(0, 20)
+          );
+          console.log(
+            "Current height:",
+            currentHeight,
+            "Expected:",
+            expectedSingleLineHeight,
+            "Cached:",
+            cachedHeight
+          );
+
           // Nếu chiều cao tăng lên và > 1 dòng → text đã wrap
           if (
             currentHeight > expectedSingleLineHeight &&
             (cachedHeight === undefined || currentHeight > cachedHeight)
           ) {
-            console.log('🚨 TEXT WRAPPED! Triggering removal');
+            console.log("🚨 TEXT WRAPPED! Triggering removal");
             // Update cache
             nodeHeightCache.set(htmlElement, currentHeight);
 
@@ -255,7 +329,7 @@ export const EmptyPlaceholderExtension =
             }
           } else if (cachedHeight === undefined) {
             // Cache initial height
-            console.log('Caching initial height:', currentHeight);
+            console.log("Caching initial height:", currentHeight);
             nodeHeightCache.set(htmlElement, currentHeight);
           }
         }

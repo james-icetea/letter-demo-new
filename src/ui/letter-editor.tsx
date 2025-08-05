@@ -11,17 +11,13 @@ import {
   Italic,
   Strikethrough,
   Underline as UnderlineIcon,
-  List,
-  ListOrdered,
-  Undo,
-  Redo,
-  Code,
-  Heading1,
-  Heading2,
-  Plus,
 } from "lucide-react";
 import { PaginationPlus } from "../extensions/PaginationExtension";
 import { Button } from "./button";
+import {
+  EmptyPlaceholderExtension,
+  EmptyPlaceholderNode,
+} from "@/extensions/EmptyPlaceholderExtension";
 
 // Zoom breakpoints interface
 interface ZoomBreakpoints {
@@ -129,6 +125,13 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         Underline,
         TextStyle,
         Color,
+        EmptyPlaceholderNode,
+        EmptyPlaceholderExtension.configure({
+          linesPerPage: config.max_line,
+          initialPages: 1,
+          lineHeight: config.context_line_height * currentZoom,
+          minLinesPerPage: 1,
+        }),
         PaginationPlus.configure(editorConfig),
       ],
       content:
@@ -139,6 +142,11 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         },
       },
       onUpdate: ({ editor }) => {
+        // Count actual page footers to get exact page count
+        const pageFooters = editor.view.dom.querySelectorAll(".rm-page-footer");
+        console.log(editor.view.dom)
+        const pageCount = pageFooters.length;
+        setNumberOfPages(pageCount ?? 0);
         console.log(editor.getJSON());
       },
     },
@@ -215,7 +223,12 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             <Strikethrough className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm" title="Add Page">
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Add Page"
+            onClick={() => editor.commands.addEmptyPage()}
+          >
             + page
           </Button>
         </div>
