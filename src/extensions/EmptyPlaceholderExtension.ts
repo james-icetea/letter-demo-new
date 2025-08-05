@@ -68,6 +68,29 @@ export const EmptyPlaceholderExtension =
       };
     },
 
+    getSimplePageFromPosition(view: any, position: number): number {
+      const { state } = view;
+      const linesPerPage = this.options.linesPerPage;
+      
+      // Count total nodes before this position
+      let nodeCount = 0;
+      state.doc.descendants((_node: any, pos: number) => {
+        if (pos < position) {
+          nodeCount++;
+        }
+      });
+      
+      // Calculate page (1-indexed)
+      return Math.floor(nodeCount / linesPerPage) + 1;
+    },
+
+    getPageBoundaries(page: number): { start: number, end: number } {
+      const linesPerPage = this.options.linesPerPage;
+      return {
+        start: (page - 1) * linesPerPage,
+        end: page * linesPerPage
+      };
+    },
 
     addCommands() {
       return {
@@ -221,7 +244,7 @@ export const EmptyPlaceholderExtension =
       const nodeHeightCache = new WeakMap<Element, number>();
       let isProcessing = false;
 
-      // Tìm và xóa EmptyPlaceholderNode rỗng tiếp theo sau cursor
+      // Tìm và xóa 1 EmptyPlaceholderNode rỗng trong trang hiện tại
       const findAndRemoveEmptyPlaceholder = (view: any) => {
         if (isProcessing) return false;
         isProcessing = true;
@@ -231,108 +254,89 @@ export const EmptyPlaceholderExtension =
           const { selection } = state;
           const cursorPos = selection.from;
 
-          // Tìm tất cả EmptyPlaceholderNode rỗng trong document
-          const emptyPlaceholders: Array<{ pos: number; node: any }> = [];
-
-          state.doc.descendants((node: any, pos: number) => {
-            if (
-              node.type.name === "emptyPlaceholder" &&
-              node.textContent.trim() === ""
-            ) {
-              emptyPlaceholders.push({ pos, node });
+          // Tính trang hiện tại từ cursor position
+          let nodeCount = 0;
+          state.doc.descendants((_node: any, pos: number) => {
+            if (pos < cursorPos) {
+              nodeCount++;
             }
           });
+          const currentPage = Math.floor(nodeCount / this.options.linesPerPage) + 1;
+          
+          // Tính page boundaries
+          const linesPerPage = this.options.linesPerPage;
+          const pageStart = (currentPage - 1) * linesPerPage;
+          const pageEnd = currentPage * linesPerPage;
+          
+          // Tìm empty placeholder trong trang hiện tại sau cursor
+          let targetPos: number | null = null;
+          let targetSize: number = 0;
+          let nodeIndex = 0;
 
-          console.log("Found empty placeholders:", emptyPlaceholders.length);
-          console.log("Cursor position:", cursorPos);
+          state.doc.descendants((node: any, pos: number) => {
+            // Chỉ xét nodes trong page boundaries
+            if (nodeIndex >= pageStart && nodeIndex < pageEnd && targetPos === null) {
+              if (
+                node.type.name === "emptyPlaceholder" &&
+                node.textContent.trim() === "" &&
+                pos >= cursorPos // Sau cursor
+              ) {
+                targetPos = pos;
+                targetSize = node.nodeSize;
+              }
+            }
+            nodeIndex++;
+          });
 
-          // Tìm EmptyPlaceholderNode rỗng đầu tiên sau cursor
-          const targetPlaceholder = emptyPlaceholders.find(
-            (p) => p.pos >= cursorPos
-          );
-
-          if (targetPlaceholder) {
-            console.log(
-              "Removing placeholder at position:",
-              targetPlaceholder.pos
-            );
-            const tr = state.tr.delete(
-              targetPlaceholder.pos,
-              targetPlaceholder.pos + targetPlaceholder.node.nodeSize
-            );
+          // Xóa placeholder đã tìm thấy - CHO PHÉP grouping với Enter transaction
+          if (targetPos !== null && targetSize > 0) {
+            const tr = state.tr.delete(targetPos, targetPos + targetSize);
+            // Không set addToHistory: false để cho phép history grouping
+            
             view.dispatch(tr);
-            console.log("Successfully removed placeholder");
+            console.log(`Removed empty placeholder in page ${currentPage} at position ${targetPos}`);
             isProcessing = false;
             return true;
           } else {
-            console.log("No empty placeholder found after cursor");
+            console.log(`No empty placeholder found in page ${currentPage}`);
           }
         } catch (error) {
-          console.error("Error in findAndRemoveEmptyPlaceholder:", error);
+          console.error("Error in placeholder removal:", error);
         }
 
         isProcessing = false;
         return false;
       };
 
-      // Kiểm tra text wrapping một cách tối ưu
+      // Text wrapping check với requestAnimationFrame
       const checkTextWrapping = (view: any) => {
         if (isProcessing) return;
 
-        const editorDom = view.dom;
-        const placeholderElements = editorDom.querySelectorAll(
-          "p.empty-placeholder"
-        );
+        // Sử dụng requestAnimationFrame để xử lý mượt mà
+        requestAnimationFrame(() => {
+          const editorDom = view.dom;
+          const allParagraphs = editorDom.querySelectorAll("p");
 
-        console.log(
-          "Checking text wrapping, found elements:",
-          placeholderElements.length
-        );
+          for (const element of allParagraphs) {
+            const htmlElement = element as HTMLElement;
+            const currentHeight = htmlElement.offsetHeight;
+            const cachedHeight = nodeHeightCache.get(htmlElement);
+            const expectedLineHeight = this.options.lineHeight;
 
-        // Chỉ kiểm tra các element có nội dung (không rỗng)
-        for (const element of placeholderElements) {
-          const htmlElement = element as HTMLElement;
-
-          // Skip empty placeholders
-          if (htmlElement.textContent?.trim() === "") continue;
-
-          const currentHeight = htmlElement.offsetHeight;
-          const cachedHeight = nodeHeightCache.get(htmlElement);
-          const expectedSingleLineHeight = 23;
-
-          console.log(
-            "Element text:",
-            htmlElement.textContent?.substring(0, 20)
-          );
-          console.log(
-            "Current height:",
-            currentHeight,
-            "Expected:",
-            expectedSingleLineHeight,
-            "Cached:",
-            cachedHeight
-          );
-
-          // Nếu chiều cao tăng lên và > 1 dòng → text đã wrap
-          if (
-            currentHeight > expectedSingleLineHeight &&
-            (cachedHeight === undefined || currentHeight > cachedHeight)
-          ) {
-            console.log("🚨 TEXT WRAPPED! Triggering removal");
-            // Update cache
-            nodeHeightCache.set(htmlElement, currentHeight);
-
-            // Xóa 1 EmptyPlaceholderNode rỗng ngay lập tức
-            const removed = findAndRemoveEmptyPlaceholder(view);
-            if (removed) {
-              break; // Chỉ xử lý 1 element mỗi lần để tránh lag
+            // Kiểm tra text wrap (paragraph cao hơn expected)
+            if (currentHeight > expectedLineHeight * 1.2) { // 20% tolerance
+              if (cachedHeight === undefined || currentHeight > cachedHeight) {
+                nodeHeightCache.set(htmlElement, currentHeight);
+                
+                console.log("Text wrapped, removing empty placeholder in current page");
+                findAndRemoveEmptyPlaceholder(view);
+                break; // Chỉ xử lý 1 lần
+              }
+            } else if (cachedHeight === undefined) {
+              nodeHeightCache.set(htmlElement, currentHeight);
             }
-          } else if (cachedHeight === undefined) {
-            // Cache initial height
-            console.log("Caching initial height:", currentHeight);
-            nodeHeightCache.set(htmlElement, currentHeight);
           }
-        }
+        });
       };
 
       return [
@@ -340,16 +344,69 @@ export const EmptyPlaceholderExtension =
           key: new PluginKey("emptyPlaceholderHandler"),
           props: {
             handleKeyDown: (view, event) => {
-              // Xử lý Enter key
+              // Xử lý Enter key - TẠO 1 TRANSACTION DUY NHẤT
               if (event.key === "Enter") {
-                findAndRemoveEmptyPlaceholder(view);
+                console.log('Enter key pressed');
+                
+                const { state } = view;
+                const { selection } = state;
+                const cursorPos = selection.from;
+
+                // Tính trang hiện tại
+                let nodeCount = 0;
+                state.doc.descendants((_node: any, pos: number) => {
+                  if (pos < cursorPos) {
+                    nodeCount++;
+                  }
+                });
+                const currentPage = Math.floor(nodeCount / this.options.linesPerPage) + 1;
+                
+                // Tìm empty placeholder để xóa
+                const linesPerPage = this.options.linesPerPage;
+                const pageStart = (currentPage - 1) * linesPerPage;
+                const pageEnd = currentPage * linesPerPage;
+                
+                let targetPos: number | null = null;
+                let targetSize: number = 0;
+                let nodeIndex = 0;
+
+                state.doc.descendants((node: any, pos: number) => {
+                  if (nodeIndex >= pageStart && nodeIndex < pageEnd && targetPos === null) {
+                    if (
+                      node.type.name === "emptyPlaceholder" &&
+                      node.textContent.trim() === "" &&
+                      pos >= cursorPos
+                    ) {
+                      targetPos = pos;
+                      targetSize = node.nodeSize;
+                    }
+                  }
+                  nodeIndex++;
+                });
+
+                // Tạo 1 TRANSACTION DUY NHẤT chứa cả Enter và Delete
+                if (targetPos !== null && targetSize > 0) {
+                  const tr = state.tr;
+                  
+                  // 1. Thực hiện Enter (split paragraph)
+                  tr.split(cursorPos);
+                  
+                  // 2. Xóa placeholder (position có thể thay đổi sau split)
+                  const adjustedTargetPos = targetPos > cursorPos ? targetPos + 1 : targetPos;
+                  tr.delete(adjustedTargetPos, adjustedTargetPos + targetSize);
+                  
+                  view.dispatch(tr);
+                  console.log(`Combined transaction: Enter + Delete placeholder in page ${currentPage}`);
+                  return true; // Block default Enter vì đã xử lý
+                }
+                
+                return false; // Let default Enter if no placeholder
               }
               return false;
             },
 
-            handleTextInput: (view) => {
-              // Kiểm tra text wrapping sau khi nhập text
-              checkTextWrapping(view);
+            handleTextInput: () => {
+              // Let text input happen normally, don't interfere
               return false;
             },
           },
@@ -359,8 +416,7 @@ export const EmptyPlaceholderExtension =
               update: (view: any, prevState: any) => {
                 // Chỉ kiểm tra khi có thay đổi nội dung thực sự
                 if (view.state.doc !== prevState.doc) {
-                  // Sử dụng requestAnimationFrame thay vì setTimeout để đồng bộ với browser rendering
-                  requestAnimationFrame(() => checkTextWrapping(view));
+                  checkTextWrapping(view);
                 }
               },
             };

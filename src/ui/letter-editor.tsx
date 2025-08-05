@@ -18,6 +18,7 @@ import {
   EmptyPlaceholderExtension,
   EmptyPlaceholderNode,
 } from "@/extensions/EmptyPlaceholderExtension";
+import { UndoRedo } from "@/extensions/UndoRedo";
 
 // Zoom breakpoints interface
 interface ZoomBreakpoints {
@@ -121,7 +122,9 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   const editor = useEditor(
     {
       extensions: [
-        StarterKit,
+        StarterKit.configure({
+          history: false
+        }),
         Underline,
         TextStyle,
         Color,
@@ -133,6 +136,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           minLinesPerPage: 1,
         }),
         PaginationPlus.configure(editorConfig),
+        UndoRedo
       ],
       content:
         "<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>",
@@ -217,7 +221,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => editor.chain().focus().toggleStrike().run()}
+            onClick={() => editor.commands.deleteRange({from: 0, to : 20})}
             className={editor.isActive("strike") ? "bg-muted" : ""}
           >
             <Strikethrough className="h-4 w-4" />
