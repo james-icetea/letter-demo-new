@@ -49,6 +49,11 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
 }) => {
   // Zoom state
   const [currentZoom, setCurrentZoom] = useState(1);
+  
+  // Store editor content to persist across recreations
+  const [editorContent, setEditorContent] = useState(
+    "<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>"
+  );
 
   // Update zoom on window resize with throttling
   useLayoutEffect(() => {
@@ -138,14 +143,16 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         PaginationPlus.configure(editorConfig),
         UndoRedo
       ],
-      content:
-        "<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>",
+      content: editorContent,
       editorProps: {
         attributes: {
           class: "mx-auto focus:outline-none",
         },
       },
       onUpdate: ({ editor }) => {
+        // Store content to persist across recreations
+        setEditorContent(editor.getHTML());
+        
         // Count actual page footers to get exact page count
         const pageFooters = editor.view.dom.querySelectorAll(".rm-page-footer");
         console.log(editor.view.dom)
