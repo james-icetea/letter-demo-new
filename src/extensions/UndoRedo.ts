@@ -48,7 +48,7 @@ export const UndoRedo = Extension.create<UndoRedoOptions>({
 
   addOptions() {
     return {
-      depth: 10,
+      depth: 5,
       newGroupDelay: 1000,
     };
   },

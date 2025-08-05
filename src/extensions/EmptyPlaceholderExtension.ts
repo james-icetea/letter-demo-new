@@ -273,20 +273,37 @@ export const EmptyPlaceholderExtension =
           let targetSize: number = 0;
           let nodeIndex = 0;
 
+          // Danh sách tất cả empty placeholders trong trang
+          const emptyPlaceholdersInPage: Array<{ pos: number, size: number }> = [];
+          
           state.doc.descendants((node: any, pos: number) => {
             // Chỉ xét nodes trong page boundaries
-            if (nodeIndex >= pageStart && nodeIndex < pageEnd && targetPos === null) {
+            if (nodeIndex >= pageStart && nodeIndex < pageEnd) {
+              // Thu thập TẤT CẢ empty placeholders thực sự trong trang
               if (
                 node.type.name === "emptyPlaceholder" &&
-                node.textContent.trim() === "" &&
-                pos >= cursorPos // Sau cursor
+                node.textContent.trim() === ""
               ) {
-                targetPos = pos;
-                targetSize = node.nodeSize;
+                emptyPlaceholdersInPage.push({ pos, size: node.nodeSize });
+                console.log(`Found empty placeholder at ${pos} in page ${currentPage}`);
+              } else if (node.textContent.trim() !== "") {
+                console.log(`Skipped node with content at ${pos}: "${node.textContent.trim()}"`);
               }
             }
             nodeIndex++;
           });
+
+          // CHỈ tìm placeholder SAU cursor - KHÔNG fallback  
+          const afterCursorPlaceholders = emptyPlaceholdersInPage.filter(p => p.pos >= cursorPos);
+          
+          if (afterCursorPlaceholders.length > 0) {
+            const selectedPlaceholder = afterCursorPlaceholders[0];
+            targetPos = selectedPlaceholder.pos;
+            targetSize = selectedPlaceholder.size;
+            console.log(`findAndRemoveEmptyPlaceholder: Selected placeholder at ${targetPos} (after cursor)`);
+          } else {
+            console.log(`findAndRemoveEmptyPlaceholder: No empty placeholder found after cursor in page ${currentPage}`);
+          }
 
           // Xóa placeholder đã tìm thấy - CHO PHÉP grouping với Enter transaction
           if (targetPos !== null && targetSize > 0) {
@@ -370,19 +387,36 @@ export const EmptyPlaceholderExtension =
                 let targetSize: number = 0;
                 let nodeIndex = 0;
 
+                // Thu thập tất cả empty placeholders trong trang
+                const emptyPlaceholdersInPage: Array<{ pos: number, size: number }> = [];
+                
                 state.doc.descendants((node: any, pos: number) => {
-                  if (nodeIndex >= pageStart && nodeIndex < pageEnd && targetPos === null) {
+                  if (nodeIndex >= pageStart && nodeIndex < pageEnd) {
+                    // Thu thập TẤT CẢ empty placeholders thực sự
                     if (
                       node.type.name === "emptyPlaceholder" &&
-                      node.textContent.trim() === "" &&
-                      pos >= cursorPos
+                      node.textContent.trim() === ""
                     ) {
-                      targetPos = pos;
-                      targetSize = node.nodeSize;
+                      emptyPlaceholdersInPage.push({ pos, size: node.nodeSize });
+                      console.log(`Enter handler: Found empty placeholder at ${pos}`);
+                    } else if (node.textContent.trim() !== "") {
+                      console.log(`Enter handler: Skipped content node at ${pos}: "${node.textContent.trim()}"`);
                     }
                   }
                   nodeIndex++;
                 });
+
+                // CHỈ tìm placeholder SAU cursor - KHÔNG fallback
+                const afterCursorPlaceholders = emptyPlaceholdersInPage.filter(p => p.pos >= cursorPos);
+                
+                if (afterCursorPlaceholders.length > 0) {
+                  const selectedPlaceholder = afterCursorPlaceholders[0];
+                  targetPos = selectedPlaceholder.pos;
+                  targetSize = selectedPlaceholder.size;
+                  console.log(`Enter: Selected placeholder at ${targetPos} (after cursor)`);
+                } else {
+                  console.log(`Enter: No empty placeholder found after cursor in page ${currentPage}`);
+                }
 
                 // Tạo 1 TRANSACTION DUY NHẤT chứa cả Enter và Delete
                 if (targetPos !== null && targetSize > 0) {
