@@ -14,42 +14,7 @@ interface PaginationPlusOptions {
   headerRight: string;
   headerLeft: string;
 }
-
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    pagination: {
-      insertPageBreak: () => ReturnType
-      addPage: () => ReturnType
-    }
-  }
-}
-
 const page_count_meta_key = "PAGE_COUNT_META_KEY";
-
-// Zoom management system
-let managedZoomLevel = 1;
-let zoomChangeCallbacks: ((zoom: number) => void)[] = [];
-
-// Manual page management
-let manualPageCount = 1;
-
-const ZoomManager = {
-  setZoom(zoom: number) {
-    managedZoomLevel = zoom;
-    zoomChangeCallbacks.forEach(callback => callback(zoom));
-  },
-  
-  getZoom(): number {
-    return managedZoomLevel;
-  },
-  
-  onZoomChange(callback: (zoom: number) => void) {
-    zoomChangeCallbacks.push(callback);
-    return () => {
-      zoomChangeCallbacks = zoomChangeCallbacks.filter(cb => cb !== callback);
-    };
-  }
-};
 export const PaginationPlus = Extension.create<PaginationPlusOptions>({
   name: "PaginationPlus",
   addOptions() {
@@ -60,53 +25,19 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
       pageBreakBackground: "#ffffff",
       pageHeaderHeight: 10,
       pageFooterHeight: 10,
-      footerRight: "{page}",
+      footerRight: "",
       footerLeft: "",
       headerRight: "",
       headerLeft: "",
     };
   },
-
-  addCommands() {
-    return {
-      insertPageBreak:
-        () =>
-        ({ commands }) => {
-          return commands.insertContent('<div class="manual-page-break" style="page-break-before: always; height: 0; margin: 0; padding: 0;"></div>')
-        },
-      addPage:
-        () =>
-        ({ editor, commands }) => {
-          manualPageCount++;
-          
-          // Add content to fill the page if editor is empty or has minimal content
-          const currentContent = editor.getText();
-          const lineCount = currentContent.split('\n').length;
-          const linesNeeded = manualPageCount * 18; // 18 lines per page
-          
-          if (lineCount < linesNeeded) {
-            // Add empty paragraphs to fill the pages
-            const linesToAdd = linesNeeded - lineCount;
-            const newLines = Array(linesToAdd).fill('<p></p>').join('');
-            commands.insertContent(newLines);
-          }
-          
-          // Trigger pagination update
-          const tr = editor.view.state.tr.setMeta(
-            page_count_meta_key,
-            Date.now()
-          );
-          editor.view.dispatch(tr);
-          return true;
-        },
-    }
-  },
   onCreate() {
     const targetNode = this.editor.view.dom;
     targetNode.classList.add("rm-with-pagination");
+    const config = { attributes: true };
     const _pageHeaderHeight = this.options.pageHeaderHeight;
     const _pageFooterHeight = this.options.pageFooterHeight;
-    const _pageHeight = Math.max(100, this.options.pageHeight - _pageHeaderHeight - _pageFooterHeight);
+    const _pageHeight = this.options.pageHeight - _pageHeaderHeight - _pageFooterHeight;
 
     const style = document.createElement("style");
     style.dataset.rmPaginationStyle = "";
@@ -197,80 +128,37 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
           ".breaker"
         ) as HTMLElement;
         if (lastPageBreak) {
-          // Keep original calculation to maintain layout stability
-          const minHeight = lastPageBreak.offsetTop + lastPageBreak.offsetHeight;
+          const minHeight =
+            lastPageBreak.offsetTop + lastPageBreak.offsetHeight;
           targetNode.style.minHeight = `${minHeight}px`;
         }
       }
     };
 
-    let debounceTimeout: NodeJS.Timeout;
-    let isZoomChanging = false;
-    
-    // Listen for zoom changes to pause pagination updates
-    ZoomManager.onZoomChange(() => {
-      isZoomChanging = true;
-      setTimeout(() => {
-        isZoomChanging = false;
-      }, 200); // Give zoom transition time to complete
-    });
-    
     const callback = (
-      mutationList: MutationRecord[]
+      mutationList: MutationRecord[],
+      observer: MutationObserver
     ) => {
-      // Skip all updates during zoom changes
-      if (isZoomChanging) return;
-      
-      // Clear previous timeout to debounce rapid changes
-      clearTimeout(debounceTimeout);
-      
-      debounceTimeout = setTimeout(() => {
-        if (mutationList.length > 0 && mutationList[0].target) {
-          const _target = mutationList[0].target as HTMLElement;
-          if (_target.classList.contains("rm-with-pagination")) {
-            // Process content changes including empty placeholders
-            const isContentMutation = mutationList.some(mutation => {
-              if (mutation.type === 'childList') {
-                // Check for text nodes, paragraphs, or non-pagination elements
-                return Array.from(mutation.addedNodes).some(node => 
-                  node.nodeType === Node.TEXT_NODE || 
-                  (node.nodeType === Node.ELEMENT_NODE && 
-                   !(node as Element).hasAttribute('data-rm-pagination') &&
-                   !(node as Element).classList.contains('rm-page-break') &&
-                   !(node as Element).classList.contains('breaker') &&
-                   !(node as Element).classList.contains('manual-page-break')) ||
-                  // Also include empty placeholder nodes
-                  (node.nodeType === Node.ELEMENT_NODE && 
-                   (node as Element).classList.contains('empty-placeholder'))
-                );
-              }
-              return false;
-            });
+      if (mutationList.length > 0 && mutationList[0].target) {
+        const _target = mutationList[0].target as HTMLElement;
+        if (_target.classList.contains("rm-with-pagination")) {
+          const currentPageCount = getExistingPageCount(this.editor.view);
+          const pageCount = calculatePageCount(this.editor.view, this.options);
+          if (currentPageCount !== pageCount) {
             
-            if (isContentMutation) {
-              const currentPageCount = getExistingPageCount(this.editor.view);
-              const pageCount = calculatePageCount(this.editor.view, this.options);
-              if (Math.abs(currentPageCount - pageCount) >= 1) {
-                const tr = this.editor.view.state.tr.setMeta(
-                  page_count_meta_key,
-                  Date.now()
-                );
-                this.editor.view.dispatch(tr);
-              }
-            }
-
-            refreshPage(_target);
+               const tr = this.editor.view.state.tr.setMeta(
+                 page_count_meta_key,
+                 Date.now()
+               );
+               this.editor.view.dispatch(tr);
           }
+
+          refreshPage(_target);
         }
-      }, 100); // Increased debounce for stability
+      }
     };
-    
     const observer = new MutationObserver(callback);
-    observer.observe(targetNode, { 
-      childList: true, 
-      subtree: true, 
-      attributes: false // Don't watch attribute changes which can be triggered by zoom
-    });
+    observer.observe(targetNode, config);
     refreshPage(targetNode);
   },
   addProseMirrorPlugins() {
@@ -285,25 +173,11 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
             const widgetList = createDecoration(state, pageOptions);
             return DecorationSet.create(state.doc, widgetList);
           },
-          apply(tr, oldDeco, _oldState, newState) {
-            // Only recalculate if there are actual document changes, not just zoom/style changes
-            if (!tr.docChanged && !tr.getMeta(page_count_meta_key)) {
-              return oldDeco;
-            }
-            
-            // Debounce decoration updates to prevent zoom-related infinite loops
-            const now = Date.now();
-            const lastUpdate = tr.getMeta('pagination-last-update') || 0;
-            if (now - lastUpdate < 100) { // 100ms cooldown
-              return oldDeco;
-            }
-            
+          apply(tr, oldDeco, oldState, newState) {
             const pageCount = calculatePageCount(editor.view, pageOptions);
             const currentPageCount = getExistingPageCount(editor.view);
             if ((pageCount > 1 ? pageCount : 1) !== currentPageCount) {
               const widgetList = createDecoration(newState, pageOptions);
-              // Set metadata to track last update time
-              tr.setMeta('pagination-last-update', now);
               return DecorationSet.create(newState.doc, [...widgetList]);
             }
             return oldDeco;
@@ -333,8 +207,8 @@ const calculatePageCount = (
   pageOptions: PaginationPlusOptions
 ) => {
   const editorDom = view.dom;
-  const pageContentAreaHeight = Math.max(100,
-    pageOptions.pageHeight - pageOptions.pageHeaderHeight - pageOptions.pageFooterHeight);
+  const pageContentAreaHeight =
+    pageOptions.pageHeight - pageOptions.pageHeaderHeight - pageOptions.pageFooterHeight;
   const paginationElement = editorDom.querySelector("[data-rm-pagination]");
   const currentPageCount = getExistingPageCount(view);
   if (paginationElement) {
@@ -347,34 +221,32 @@ const calculatePageCount = (
         lastPageBreak.getBoundingClientRect().bottom;
       if (lastPageGap > 0) {
         const addPage = Math.ceil(lastPageGap / pageContentAreaHeight);
-        const calculatedPages = currentPageCount + addPage;
-        return Math.max(calculatedPages, manualPageCount);
+        return currentPageCount + addPage;
       } else {
-        const lpFrom = -pageOptions.pageFooterHeight;
-        const lpTo = -(pageOptions.pageHeight - pageOptions.pageFooterHeight);
+        const lpFrom = -pageOptions.pageHeaderHeight;
+        const lpTo = -(pageOptions.pageHeight - pageOptions.pageHeaderHeight);
         if (lastPageGap > lpTo && lastPageGap < lpFrom) {
-          return Math.max(currentPageCount, manualPageCount);
+          return currentPageCount;
         } else if (lastPageGap < lpTo) {
           const pageHeightOnRemove =
             pageOptions.pageHeight + pageOptions.pageGap;
           const removePage = Math.floor(lastPageGap / pageHeightOnRemove);
-          const calculatedPages = currentPageCount + removePage;
-          return Math.max(calculatedPages, manualPageCount);
+          return currentPageCount + removePage;
         } else {
-          return Math.max(currentPageCount, manualPageCount);
+          return currentPageCount;
         }
       }
     }
-    return manualPageCount;
+    return 1;
   } else {
     const editorHeight = editorDom.scrollHeight;
     const pageCount = Math.ceil(editorHeight / pageContentAreaHeight);
-    return Math.max(pageCount, manualPageCount);
+    return pageCount <= 0 ? 1 : pageCount;
   }
 };
 
 function createDecoration(
-  _state: EditorState,
+  state: EditorState,
   pageOptions: PaginationPlusOptions,
   isInitial: boolean = false
 ): Decoration[] {
@@ -384,7 +256,7 @@ function createDecoration(
       const _pageGap = pageOptions.pageGap;
       const _pageHeaderHeight = pageOptions.pageHeaderHeight;
       const _pageFooterHeight = pageOptions.pageFooterHeight;
-      const _pageHeight = Math.max(100, pageOptions.pageHeight - _pageHeaderHeight - _pageFooterHeight);
+      const _pageHeight = pageOptions.pageHeight - _pageHeaderHeight - _pageFooterHeight;
       const _pageBreakBackground = pageOptions.pageBreakBackground;
 
       const breakerWidth = view.dom.clientWidth;
@@ -394,9 +266,10 @@ function createDecoration(
 
       const pageBreakDefinition = ({
         firstPage = false,
+        lastPage = false,
       }: {
         firstPage: boolean;
-        lastPage?: boolean;
+        lastPage: boolean;
       }) => {
         const pageContainer = document.createElement("div");
         pageContainer.classList.add("rm-page-break");
@@ -478,9 +351,10 @@ function createDecoration(
         return pageContainer;
       };
 
-      const page = pageBreakDefinition({ firstPage: false });
+      const page = pageBreakDefinition({ firstPage: false, lastPage: false });
       const firstPage = pageBreakDefinition({
         firstPage: true,
+        lastPage: false,
       });
       const fragment = document.createDocumentFragment();
 
@@ -525,6 +399,3 @@ function createDecoration(
 
   return !isInitial ? [pageWidget, firstHeaderWidget] : [pageWidget];
 }
-
-// Export ZoomManager for external use
-export { ZoomManager };

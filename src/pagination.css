@@ -43,8 +43,6 @@
 /* Responsive letter editor using CSS custom properties */
 :root {
   --letter-scale: 1;
-  --letter-base-width: 370px;
-  --letter-base-height: 518px;
   --letter-base-font-size: 12.8px;
   --letter-base-line-height: 24px;
   --letter-base-padding: 52px;
