@@ -163,6 +163,104 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   // This is a fallback for initial render
   const [numberOfPages, setNumberOfPages] = useState(1);
 
+  // Debug editor for normalize functionality
+  const debugEditor = useEditor(
+    {
+      extensions: [
+        StarterKit.configure({
+          history: false,
+        }),
+        Underline,
+        TextStyle,
+        Color,
+        EmptyPlaceholderNode,
+        EmptyPlaceholderExtension.configure({
+          linesPerPage: config.max_line,
+          initialPages: 1,
+          lineHeight: config.context_line_height * currentZoom,
+          minLinesPerPage: 1,
+        }),
+        PaginationPlus.configure(editorConfig),
+        UndoRedo,
+      ],
+      content: "",
+      editorProps: {
+        attributes: {
+          class: "mx-auto focus:outline-none",
+        },
+      },
+    },
+    [editorConfig]
+  );
+
+  // Normalize pages function
+  const normalizePage = () => {
+    if (!editor || !debugEditor) return;
+
+    const docSize = editor.state.doc.content.size;
+    const pages: Array<{ from: number; to: number; content: string }> = [];
+
+    let start = 0;
+
+    while (start < docSize) {
+      let current = start;
+      let validEnd = start;
+
+      // Find the end of current page by checking height
+      while (current < docSize) {
+        const jsonSlice = editor.state.doc.slice(start, current + 5);
+
+        // Set content to debug editor to check height
+        debugEditor.commands.setContent(jsonSlice.toJSON());
+
+        // Get debug editor height
+        const debugEditorHeight = debugEditor.view.dom.offsetHeight;
+        // Use 5px tolerance for height comparison
+        if (Math.abs(debugEditorHeight - editorConfig.pageHeight) <= 5) {
+          validEnd = current;
+          current += 5;
+        } else if (debugEditorHeight > editorConfig.pageHeight) {
+          break;
+        } else {
+          validEnd = current;
+          current += 5;
+        }
+      }
+
+      // Get text content for this page
+      const pageContent = editor.state.doc.textBetween(start, validEnd);
+
+      pages.push({
+        from: start,
+        to: validEnd,
+        content: pageContent,
+      });
+
+      start = validEnd;
+
+      // Prevent infinite loop
+      if (validEnd === start && start < docSize) {
+        start += 1;
+      }
+    }
+
+    // Filter out empty pages
+    const nonEmptyPages = pages.filter((page) => page.content.trim() !== "");
+
+    // Reconstruct content from non-empty pages using JSON
+    if (nonEmptyPages.length > 0) {
+      const combinedContent = nonEmptyPages.map((page) => {
+        return editor.state.doc.slice(page.from, page.to).toJSON();
+      });
+      
+      const newContent = {
+        type: "doc",
+        content: combinedContent.flatMap((pageJson) => pageJson.content || []),
+      };
+      editor.commands.setContent(newContent);
+    }
+  };
+
   // Update background pages when editor content changes
   useEffect(() => {
     if (editor) {
@@ -248,6 +346,15 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           >
             + page
           </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Normalize Pages"
+            onClick={normalizePage}
+          >
+            Normalize
+          </Button>
         </div>
       </div>
       <div
@@ -289,6 +396,17 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             paddingInline: config.inline_padding * currentZoom,
           }}
         />
+
+        {debugEditor && (
+          <EditorContent
+            editor={debugEditor}
+            id="debug-editor"
+            style={{
+              marginTop: editorConfig.pageGap,
+              paddingInline: config.inline_padding * currentZoom,
+            }}
+          />
+        )}
       </div>
     </div>
   );
