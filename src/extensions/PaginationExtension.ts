@@ -137,7 +137,6 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
 
     const callback = (
       mutationList: MutationRecord[],
-      observer: MutationObserver
     ) => {
       if (mutationList.length > 0 && mutationList[0].target) {
         const _target = mutationList[0].target as HTMLElement;
@@ -173,7 +172,7 @@ export const PaginationPlus = Extension.create<PaginationPlusOptions>({
             const widgetList = createDecoration(state, pageOptions);
             return DecorationSet.create(state.doc, widgetList);
           },
-          apply(tr, oldDeco, oldState, newState) {
+          apply(_tr, oldDeco, _oldState, newState) {
             const pageCount = calculatePageCount(editor.view, pageOptions);
             const currentPageCount = getExistingPageCount(editor.view);
             if ((pageCount > 1 ? pageCount : 1) !== currentPageCount) {
@@ -246,7 +245,7 @@ const calculatePageCount = (
 };
 
 function createDecoration(
-  state: EditorState,
+  _state: EditorState,
   pageOptions: PaginationPlusOptions,
   isInitial: boolean = false
 ): Decoration[] {
@@ -266,7 +265,6 @@ function createDecoration(
 
       const pageBreakDefinition = ({
         firstPage = false,
-        lastPage = false,
       }: {
         firstPage: boolean;
         lastPage: boolean;

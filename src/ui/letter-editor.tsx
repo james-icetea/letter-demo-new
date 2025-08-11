@@ -6,12 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
-import {
-  Bold,
-  Italic,
-  Strikethrough,
-  Underline as UnderlineIcon,
-} from "lucide-react";
+import { Bold, Italic, Underline as UnderlineIcon, Smile } from "lucide-react";
 import { PaginationPlus } from "../extensions/PaginationExtension";
 import { Button } from "./button";
 import {
@@ -19,6 +14,7 @@ import {
   EmptyPlaceholderNode,
 } from "@/extensions/EmptyPlaceholderExtension";
 import { UndoRedo } from "@/extensions/UndoRedo";
+import { EmojiPicker } from "./emoji-picker";
 
 // Zoom breakpoints interface
 interface ZoomBreakpoints {
@@ -49,7 +45,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
 }) => {
   // Zoom state
   const [currentZoom, setCurrentZoom] = useState(1);
-  
+
   // Store editor content to persist across recreations
   const [editorContent, setEditorContent] = useState(
     "<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>"
@@ -128,7 +124,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     {
       extensions: [
         StarterKit.configure({
-          history: false
+          history: false,
         }),
         Underline,
         TextStyle,
@@ -141,7 +137,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           minLinesPerPage: 1,
         }),
         PaginationPlus.configure(editorConfig),
-        UndoRedo
+        UndoRedo,
       ],
       content: editorContent,
       editorProps: {
@@ -152,10 +148,10 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       onUpdate: ({ editor }) => {
         // Store content to persist across recreations
         setEditorContent(editor.getHTML());
-        
+
         // Count actual page footers to get exact page count
         const pageFooters = editor.view.dom.querySelectorAll(".rm-page-footer");
-        console.log(editor.view.dom)
+        console.log(editor.view.dom);
         const pageCount = pageFooters.length;
         setNumberOfPages(pageCount ?? 0);
         console.log(editor.getJSON());
@@ -225,14 +221,24 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           >
             <UnderlineIcon className="h-4 w-4" />
           </Button>
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             onClick={() => editor.commands.deleteRange({from: 0, to : 20})}
             className={editor.isActive("strike") ? "bg-muted" : ""}
           >
             <Strikethrough className="h-4 w-4" />
-          </Button>
+          </Button> */}
+
+          <EmojiPicker
+            onChange={(emoji) =>
+              editor.chain().focus().insertContent(emoji).run()
+            }
+          >
+            <Button variant="ghost" size="sm" title="Insert Emoji">
+              <Smile className="h-4 w-4" />
+            </Button>
+          </EmojiPicker>
 
           <Button
             variant="ghost"
