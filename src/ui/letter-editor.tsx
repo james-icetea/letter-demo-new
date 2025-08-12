@@ -6,7 +6,16 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
-import { Bold, Italic, Underline as UnderlineIcon, Smile } from "lucide-react";
+import Highlight from "@tiptap/extension-highlight";
+import { FontSize } from "@/extensions/FontSizeExtension";
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  Smile,
+  Highlighter,
+  Palette,
+} from "lucide-react";
 import { PaginationPlus } from "../extensions/PaginationExtension";
 import { Button } from "./button";
 import {
@@ -47,9 +56,1055 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   const [currentZoom, setCurrentZoom] = useState(1);
 
   // Store editor content to persist across recreations
-  const [editorContent, setEditorContent] = useState(
-    "<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>"
-  );
+  const [editorContent, setEditorContent] = useState<any>({
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "1",
+          },
+        ],
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+        content: [
+          {
+            type: "text",
+            text: "1233123",
+          },
+        ],
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+        content: [
+          {
+            type: "text",
+            text: "123",
+          },
+        ],
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+        content: [
+          {
+            type: "text",
+            text: "313",
+          },
+        ],
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+      {
+        type: "emptyPlaceholder",
+      },
+    ],
+  });
 
   // Update zoom on window resize with throttling
   useLayoutEffect(() => {
@@ -129,6 +1184,10 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         Underline,
         TextStyle,
         Color,
+        Highlight.configure({
+          multicolor: true,
+        }),
+        FontSize,
         EmptyPlaceholderNode,
         EmptyPlaceholderExtension.configure({
           linesPerPage: config.max_line,
@@ -146,12 +1205,12 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         },
       },
       onUpdate: ({ editor }) => {
+        console.log("Editor updated:", editor.getJSON());
         // Store content to persist across recreations
-        setEditorContent(editor.getHTML());
+        setEditorContent(editor.getJSON());
 
         // Count actual page footers to get exact page count
-        const pageFooters = editor.view.dom.querySelectorAll(".rm-page-footer");
-        console.log(editor.view.dom);
+        const pageFooters = editor.view.dom.querySelectorAll(".rm-page-break");
         const pageCount = pageFooters.length;
         setNumberOfPages(pageCount ?? 0);
         console.log(editor.getJSON());
@@ -173,6 +1232,10 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         Underline,
         TextStyle,
         Color,
+        Highlight.configure({
+          multicolor: true,
+        }),
+        FontSize,
         EmptyPlaceholderNode,
         EmptyPlaceholderExtension.configure({
           linesPerPage: config.max_line,
@@ -183,7 +1246,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         PaginationPlus.configure(editorConfig),
         UndoRedo,
       ],
-      content: "",
+      content: undefined,
       editorProps: {
         attributes: {
           class: "mx-auto focus:outline-none",
@@ -193,71 +1256,245 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     [editorConfig]
   );
 
-  // Normalize pages function
-  const normalizePage = () => {
-    if (!editor || !debugEditor) return;
+  // Helper function to extract text content from any node
+  const extractTextFromNode = (node: any): string => {
+    if (!node) return "";
 
-    const docSize = editor.state.doc.content.size;
+    if (node.type === "text") {
+      return node.text || "";
+    }
+
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.map(extractTextFromNode).join("");
+    }
+
+    return "";
+  };
+
+  // Optimized normalize pages function
+  const normalizePage = async () => {
+    if (!editor || !debugEditor) {
+      console.warn("Editors not available for normalization");
+      return { content: [], openEnd: 0 };
+    }
+
+    const doc = editor.state.doc;
+    const docSize = doc.content.size;
+    console.log(docSize);
+    if (docSize === 0) {
+      return { content: "[]", from: 0, to: 0 };
+    }
+
     const pages: Array<{ from: number; to: number; content: string }> = [];
+    const targetPageHeight = editorConfig.pageHeight;
 
     let start = 0;
+    const maxIterations = docSize * 2; // Safety limit to prevent infinite loops
+    let iterationCount = 0;
 
-    while (start < docSize) {
-      let current = start;
-      let validEnd = start;
+    // Semaphore to prevent overlapping getContentHeight calls
+    let isHeightMeasuring = false;
 
-      // Find the end of current page by checking height
-      while (current < docSize) {
-        const jsonSlice = editor.state.doc.slice(start, current + 5);
+    // Helper function to safely get content height without caching
+    const getContentHeight = async (
+      fromPos: number,
+      toPos: number
+    ): Promise<number> => {
+      // Wait if another measurement is in progress to prevent overlapping
+      while (isHeightMeasuring) {
+        await new Promise((resolve) => setTimeout(resolve, 2));
+      }
 
-        // Set content to debug editor to check height
-        debugEditor.commands.setContent(jsonSlice.toJSON());
+      isHeightMeasuring = true;
 
-        // Get debug editor height
-        const debugEditorHeight = debugEditor.view.dom.offsetHeight;
-        // Use 5px tolerance for height comparison
-        if (Math.abs(debugEditorHeight - editorConfig.pageHeight) <= 5) {
-          validEnd = current;
-          current += 5;
-        } else if (debugEditorHeight > editorConfig.pageHeight) {
-          break;
-        } else {
-          validEnd = current;
-          current += 5;
+      try {
+        // Strict boundary validation to prevent node type errors
+        if (fromPos < 0 || toPos > docSize || fromPos >= toPos) {
+          return 0;
+        }
+        // Ensure positions are valid node boundaries
+        const validFromPos = Math.max(0, Math.min(fromPos, docSize));
+        const validToPos = Math.max(validFromPos, Math.min(toPos, docSize));
+
+        if (validFromPos === validToPos) {
+          return 0;
+        }
+
+        // Extract the actual document slice and convert to JSON
+        const slice = doc.slice(validFromPos, validToPos);
+        const sliceJson = slice.toJSON();
+
+        if (sliceJson && sliceJson.content) {
+          // Batch DOM updates to avoid excessive reflows
+          debugEditor.commands.setContent({
+            type: "doc",
+            content: sliceJson.content,
+          });
+          
+          // Only focus if not already focused (avoid redundant DOM operations)
+          if (!debugEditor.isFocused) {
+            debugEditor.commands.focus();
+          }
+
+          // Wait for DOM to fully update and render using requestAnimationFrame
+          const height = await new Promise<number>((resolve) => {
+            requestAnimationFrame(() => {
+              // Second RAF to ensure DOM is fully painted
+              requestAnimationFrame(() => {
+                // Force a reflow to ensure measurement is accurate
+                void debugEditor.view.dom.offsetHeight;
+                const measuredHeight = debugEditor.view.dom.offsetHeight;
+                console.log(
+                  `Measured height for range ${validFromPos}-${validToPos}:`,
+                  measuredHeight
+                );
+                resolve(measuredHeight);
+              });
+            });
+          });
+
+          return height;
+        }
+      } catch (error) {
+        console.error("Error in getContentHeight:", error);
+      } finally {
+        isHeightMeasuring = false;
+      }
+
+      return 0;
+    };
+
+    // Optimized jump-forward algorithm to find page break point
+    const findPageBreak = async (startPos: number): Promise<number> => {
+      const startTime = performance.now();
+      // First check if remaining content from startPos to docSize fits in one page
+      if (startPos < docSize) {
+        const remainingHeight = await getContentHeight(startPos, docSize);
+        if (remainingHeight > 0 && remainingHeight <= targetPageHeight + 5) {
+          // Remaining content fits in target height, make it the last page
+          return docSize;
         }
       }
 
-      // Get text content for this page
-      const pageContent = editor.state.doc.textBetween(start, validEnd);
+      // Start with a larger jump for faster traversal
+      let currentEnd = startPos + 1;
+      const jumpSize = 15; // Increased from 7 to 15 for faster scanning
+      let lastGoodEnd = startPos + 1;
 
-      pages.push({
-        from: start,
-        to: validEnd,
-        content: pageContent,
-      });
+      // Phase 1: Jump forward by 15 until we overflow
+      while (currentEnd < docSize && iterationCount < maxIterations) {
+        iterationCount++;
 
-      start = validEnd;
+        // Early exit optimization: if remaining content is very small, assume it fits
+        const remainingNodes = docSize - currentEnd;
+        if (remainingNodes <= 3) {
+          lastGoodEnd = Math.min(currentEnd + remainingNodes, docSize);
+          break;
+        }
 
-      // Prevent infinite loop
-      if (validEnd === start && start < docSize) {
-        start += 1;
+        const height = await getContentHeight(startPos, currentEnd);
+        if (height === 0) {
+          // If we can't measure, move forward conservatively
+          currentEnd++;
+          continue;
+        }
+
+        if (height <= targetPageHeight + 5) {
+          // Content fits, save this position and jump forward
+          lastGoodEnd = currentEnd;
+          currentEnd += jumpSize;
+        } else {
+          // Content overflows, break and start stepping back
+          break;
+        }
       }
+
+      // Phase 2: Step back from overflow point to find optimal break
+      let stepBackEnd = Math.min(currentEnd, docSize);
+
+      // Step back one by one from the overflow point
+      while (stepBackEnd > lastGoodEnd && iterationCount < maxIterations) {
+        iterationCount++;
+        stepBackEnd--;
+
+        const height = await getContentHeight(startPos, stepBackEnd);
+        if (height === 0) {
+          continue;
+        }
+
+        if (height <= targetPageHeight + 5) {
+          // Found the optimal break point
+          return stepBackEnd;
+        }
+      }
+
+      // Fallback to the last known good position
+      const result =
+        lastGoodEnd > startPos ? lastGoodEnd : Math.min(startPos + 1, docSize);
+      const endTime = performance.now();
+      console.log(
+        `findPageBreak(${startPos} -> ${result}) took ${(
+          endTime - startTime
+        ).toFixed(2)}ms`
+      );
+      return result;
+    };
+
+    while (start < docSize && iterationCount < maxIterations) {
+      const pageEnd = await findPageBreak(start);
+
+      try {
+        // Get text content for this page range
+        const textContent = doc.textBetween(start, pageEnd);
+
+        pages.push({
+          from: start,
+          to: pageEnd,
+          content: textContent, // Store text string
+        });
+      } catch (error) {
+        console.warn(
+          `Error extracting text content for range ${start}-${pageEnd}:`,
+          error
+        );
+      }
+
+      start = pageEnd;
     }
 
-    // Filter out empty pages
-    const nonEmptyPages = pages.filter((page) => page.content.trim() !== "");
+    // Filter out empty pages (check if content array has meaningful content)
+    const nonEmptyPages = pages.filter((page) => {
+      return !!page.content.trim();
+    });
 
-    // Reconstruct content from non-empty pages using JSON
-    if (nonEmptyPages.length > 0) {
-      const combinedContent = nonEmptyPages.map((page) => {
-        return editor.state.doc.slice(page.from, page.to).toJSON();
-      });
-      
-      const newContent = {
+    const normalizedContent = {
+      type: "doc",
+      content: nonEmptyPages.reduce((prev, cur) => {
+        const slice = editor.state.doc.slice(cur.from, cur.to);
+        const sliceJson = slice.toJSON();
+        return prev.concat(sliceJson.content);
+      }, []),
+    };
+    console.log(docSize);
+    console.log("Total pages found:", pages);
+    console.log("Non-empty pages:", nonEmptyPages);
+    console.log(
+      "Normalized content:",
+      nonEmptyPages.map((cur) => {
+        const slice = editor.state.doc.slice(cur.from, cur.to);
+        const sliceJson = slice.toJSON();
+        return sliceJson;
+      }, [])
+    );
+    try {
+      editor.commands.setContent({
         type: "doc",
-        content: combinedContent.flatMap((pageJson) => pageJson.content || []),
-      };
-      editor.commands.setContent(newContent);
+        content: normalizedContent.content,
+      });
+
+      editor.commands.focus();
+    } catch (error) {
+      console.error("Error setting normalized content:", error);
     }
   };
 
@@ -319,14 +1556,78 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           >
             <UnderlineIcon className="h-4 w-4" />
           </Button>
-          {/* <Button
+
+          <div className="border-l mx-1" />
+
+          {/* Highlight Color Picker */}
+          <div className="relative">
+            <input
+              type="color"
+              onChange={(e) =>
+                editor
+                  .chain()
+                  .focus()
+                  .setHighlight({ color: e.target.value })
+                  .run()
+              }
+              className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent"
+              title="Highlight Color"
+              defaultValue="#ffff00"
+            />
+            <Highlighter className="h-4 w-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          <Button
             variant="ghost"
             size="sm"
-            onClick={() => editor.commands.deleteRange({from: 0, to : 20})}
-            className={editor.isActive("strike") ? "bg-muted" : ""}
+            onClick={() => editor.chain().focus().unsetHighlight().run()}
+            title="Remove Highlight"
           >
-            <Strikethrough className="h-4 w-4" />
-          </Button> */}
+            Remove Highlight
+          </Button>
+
+          {/* Text Color Picker */}
+          <div className="relative">
+            <input
+              type="color"
+              onChange={(e) =>
+                editor.chain().focus().setColor(e.target.value).run()
+              }
+              className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent"
+              title="Text Color"
+              defaultValue="#000000"
+            />
+            <Palette className="h-4 w-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().unsetColor().run()}
+            title="Remove Text Color"
+          >
+            Reset Color
+          </Button>
+
+          {/* Font Size Selector */}
+          <select
+            onChange={(e) => {
+              if (e.target.value === "normal") {
+                editor.chain().focus().unsetFontSize().run();
+              } else {
+                editor.chain().focus().setFontSize(e.target.value).run();
+              }
+            }}
+            className="px-2 py-1 text-sm border rounded"
+            title="Font Size"
+          >
+            <option value="xsmall">8.8px</option>
+            <option value="small">10.8px</option>
+            <option value="normal" selected>
+              12.8px
+            </option>
+            <option value="large">14.8px</option>
+          </select>
 
           <EmojiPicker
             onChange={(emoji) =>
@@ -351,7 +1652,9 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             variant="ghost"
             size="sm"
             title="Normalize Pages"
-            onClick={normalizePage}
+            onClick={() => {
+              normalizePage().catch(console.error);
+            }}
           >
             Normalize
           </Button>
@@ -390,23 +1693,21 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
 
         <EditorContent
           editor={editor}
-          className="w-full mx-auto"
-          id="editor"
+          className="w-full mx-auto editor-container"
           style={{
             paddingInline: config.inline_padding * currentZoom,
           }}
         />
 
-        {debugEditor && (
-          <EditorContent
-            editor={debugEditor}
-            id="debug-editor"
-            style={{
-              marginTop: editorConfig.pageGap,
-              paddingInline: config.inline_padding * currentZoom,
-            }}
-          />
-        )}
+        <EditorContent
+          editor={debugEditor}
+          id="e"
+          className="w-full mx-auto editor-container"
+          style={{
+            marginTop: editorConfig.pageGap,
+            paddingInline: config.inline_padding * currentZoom,
+          }}
+        />
       </div>
     </div>
   );
