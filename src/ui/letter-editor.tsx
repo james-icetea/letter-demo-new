@@ -1196,7 +1196,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           minLinesPerPage: 1,
         }),
         PaginationPlus.configure(editorConfig),
-        UndoRedo,
+        // UndoRedo,
       ],
       content: editorContent,
       editorProps: {
@@ -1244,7 +1244,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           minLinesPerPage: 1,
         }),
         PaginationPlus.configure(editorConfig),
-        UndoRedo,
+        // UndoRedo,
       ],
       content: undefined,
       editorProps: {
